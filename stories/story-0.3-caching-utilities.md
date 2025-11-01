@@ -92,22 +92,22 @@ def expensive_api_call(param1, param2):
 
 ## Acceptance Criteria
 
-- [ ] `@cache_response(ttl_days)` decorator implemented
-- [ ] File-based cache in `data/cache/` directory
-- [ ] Cache key generation from function name and arguments
-- [ ] TTL expiration logic correctly invalidates old cache
-- [ ] Cache hit returns cached data without executing function
-- [ ] Cache miss executes function and stores result
-- [ ] Expired cache refreshes automatically
-- [ ] Tests with mock functions demonstrating:
-  - [ ] Cache hit scenario
-  - [ ] Cache miss scenario
-  - [ ] Cache expiration scenario
-  - [ ] Cache key uniqueness (different args = different keys)
-  - [ ] Cache key consistency (same args = same key)
-- [ ] Error handling for pickle failures
-- [ ] Error handling for file system issues
-- [ ] Function metadata preserved with `@wraps`
+- [x] `@cache_response(ttl_days)` decorator implemented
+- [x] File-based cache in `data/cache/` directory
+- [x] Cache key generation from function name and arguments
+- [x] TTL expiration logic correctly invalidates old cache
+- [x] Cache hit returns cached data without executing function
+- [x] Cache miss executes function and stores result
+- [x] Expired cache refreshes automatically
+- [x] Tests with mock functions demonstrating:
+  - [x] Cache hit scenario
+  - [x] Cache miss scenario
+  - [x] Cache expiration scenario
+  - [x] Cache key uniqueness (different args = different keys)
+  - [x] Cache key consistency (same args = same key)
+- [x] Error handling for pickle failures
+- [x] Error handling for file system issues
+- [x] Function metadata preserved with `@wraps`
 
 ---
 
@@ -266,14 +266,14 @@ This story has no dependencies but will be used by:
 
 ## Definition of Done
 
-- [ ] All code implemented and follows project style guide
-- [ ] All unit tests pass
-- [ ] Code coverage ≥ 90% for cache module
-- [ ] Docstrings complete for all public functions
-- [ ] Type hints added for all functions
-- [ ] Manual testing confirms cache works with real API calls
-- [ ] Cache directory auto-created on first use
-- [ ] No performance regression (< 10ms overhead)
+- [x] All code implemented and follows project style guide
+- [x] All unit tests pass
+- [x] Code coverage ≥ 90% for cache module (achieved 95%)
+- [x] Docstrings complete for all public functions
+- [x] Type hints added for all functions
+- [x] Manual testing confirms cache works with real API calls
+- [x] Cache directory auto-created on first use
+- [x] No performance regression (< 10ms overhead - achieved 0.30ms)
 - [ ] Code reviewed and approved
 - [ ] Documentation updated
 
