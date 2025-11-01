@@ -127,25 +127,25 @@ If `--enrich-indoor-outdoor` flag is set:
 
 ## Acceptance Criteria
 
-- [ ] Script is executable via `python scripts/collect_data.py`
-- [ ] Progress logging for each major stage
-- [ ] Progress indicators show current/total counts (e.g., "15/45")
-- [ ] Error handling with informative messages (doesn't crash on API errors)
-- [ ] Validates required API key before starting
-- [ ] Creates necessary directories automatically
-- [ ] Saves intermediate results if script fails mid-execution
-- [ ] Execution time < 30 minutes for full Algarve collection
-- [ ] Clean console output (not cluttered with debug info unless `--verbose`)
-- [ ] **Exit Codes Implemented:**
-  - [ ] Exit code 0 on successful completion
-  - [ ] Exit code 1 when API key is missing
-  - [ ] Exit code 1 when configuration is invalid
-  - [ ] Exit code 2 when data collection fails
-  - [ ] Exit code 3 when data processing fails
-- [ ] Command-line arguments work correctly
-- [ ] Works with and without optional enrichment steps
-- [ ] Displays summary statistics at the end
-- [ ] Proper timestamp formatting in output
+- [x] Script is executable via `python scripts/collect_data.py`
+- [x] Progress logging for each major stage
+- [x] Progress indicators show current/total counts (e.g., "15/45")
+- [x] Error handling with informative messages (doesn't crash on API errors)
+- [x] Validates required API key before starting
+- [x] Creates necessary directories automatically
+- [x] Saves intermediate results if script fails mid-execution
+- [x] Execution time < 30 minutes for full Algarve collection
+- [x] Clean console output (not cluttered with debug info unless `--verbose`)
+- [x] **Exit Codes Implemented:**
+  - [x] Exit code 0 on successful completion
+  - [x] Exit code 1 when API key is missing
+  - [x] Exit code 1 when configuration is invalid
+  - [x] Exit code 2 when data collection fails
+  - [x] Exit code 3 when data processing fails
+- [x] Command-line arguments work correctly
+- [x] Works with and without optional enrichment steps
+- [x] Displays summary statistics at the end
+- [x] Proper timestamp formatting in output
 
 ---
 
@@ -246,49 +246,49 @@ When `--verbose` flag is set:
 Create `tests/test_scripts/test_collect_data.py` to test:
 
 1. **Argument Parsing**
-   - Test default values
-   - Test custom arguments
-   - Test flag combinations
+   - [x] Test default values
+   - [x] Test custom arguments
+   - [x] Test flag combinations
 
 2. **Configuration Validation**
-   - Test missing API key handling
-   - Test invalid configuration
+   - [x] Test missing API key handling
+   - [x] Test invalid configuration
 
 3. **Progress Logging**
-   - Test log messages are formatted correctly
-   - Test progress indicators
+   - [x] Test log messages are formatted correctly
+   - [x] Test progress indicators
 
 4. **Error Handling**
-   - Test API error recovery
-   - Test file write errors
-   - Test invalid region handling
+   - [x] Test API error recovery
+   - [x] Test file write errors
+   - [x] Test invalid region handling
 
 5. **Exit Codes**
-   - Test success exit code (0) when all stages complete
-   - Test exit code 1 when GOOGLE_API_KEY is missing
-   - Test exit code 1 when configuration is invalid
-   - Test exit code 2 when Google Places API fails
-   - Test exit code 3 when data cleaning/deduplication fails
-   - Verify exit codes are returned to shell correctly
+   - [x] Test success exit code (0) when all stages complete
+   - [x] Test exit code 1 when GOOGLE_API_KEY is missing
+   - [x] Test exit code 1 when configuration is invalid
+   - [x] Test exit code 2 when Google Places API fails
+   - [x] Test exit code 3 when data cleaning/deduplication fails
+   - [x] Verify exit codes are returned to shell correctly
 
 ### Integration Tests
 
 Test the full pipeline with mocked components:
-- Mock GooglePlacesCollector to return sample data
-- Mock ReviewCollector and LLM Analyzer
-- Verify data flows through all stages correctly
-- Verify CSV output is correctly formatted
+- [x] Mock GooglePlacesCollector to return sample data
+- [x] Mock ReviewCollector and LLM Analyzer
+- [x] Verify data flows through all stages correctly
+- [x] Verify CSV output is correctly formatted
 
 ### Manual Testing
 
 Run the script with various configurations:
-- [ ] Default configuration (no flags)
-- [ ] With reviews (`--with-reviews`)
-- [ ] With LLM enrichment (`--enrich-indoor-outdoor`)
-- [ ] With both optional features
-- [ ] With invalid API key (verify error handling)
-- [ ] With `--verbose` flag
-- [ ] Run twice (verify caching speeds up second run)
+- [x] Default configuration (no flags)
+- [x] With reviews (`--with-reviews`)
+- [x] With LLM enrichment (`--enrich-indoor-outdoor`)
+- [x] With both optional features
+- [x] With invalid API key (verify error handling)
+- [x] With `--verbose` flag
+- [x] Run twice (verify caching speeds up second run)
 
 ---
 

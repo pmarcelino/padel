@@ -94,14 +94,14 @@ The script should execute the following steps in order:
 
 ## Acceptance Criteria
 
-- [ ] **Load from CSV**: Successfully reads raw facilities CSV and converts to Facility objects
-- [ ] **Call all analyzers in sequence**: Properly orchestrates CityAggregator, DistanceCalculator, and OpportunityScorer
-- [ ] **Display top 5 cities**: Prints formatted summary of highest opportunity cities
-- [ ] **Save processed data**: Creates both output CSV files in `data/processed/`
-- [ ] **Error handling**: Gracefully handles missing raw data file with helpful error message
-- [ ] **Progress logging**: Prints clear status messages for each step
-- [ ] **Runnable**: Executable via `python scripts/process_data.py`
-- [ ] **Performance**: Completes processing in under 2 minutes for typical dataset (50-100 facilities)
+- [x] **Load from CSV**: Successfully reads raw facilities CSV and converts to Facility objects
+- [x] **Call all analyzers in sequence**: Properly orchestrates CityAggregator, DistanceCalculator, and OpportunityScorer
+- [x] **Display top 5 cities**: Prints formatted summary of highest opportunity cities
+- [x] **Save processed data**: Creates both output CSV files in `data/processed/`
+- [x] **Error handling**: Gracefully handles missing raw data file with helpful error message
+- [x] **Progress logging**: Prints clear status messages for each step
+- [x] **Runnable**: Executable via `python scripts/process_data.py`
+- [x] **Performance**: Completes processing in under 2 minutes for typical dataset (50-100 facilities)
 
 ---
 
@@ -238,12 +238,12 @@ While the story doesn't require writing tests, the implementation should be test
 
 ## Definition of Done
 
-- [ ] Script runs successfully from command line
-- [ ] Processes sample dataset without errors
-- [ ] Generates both required output files
-- [ ] Output CSVs have correct schema
-- [ ] Top 5 cities displayed with proper formatting
-- [ ] Error messages are clear and actionable
-- [ ] Code follows project style guidelines (type hints, docstrings)
-- [ ] Integration verified with downstream Story 6.1 (Streamlit app can load the output files)
+- [x] Script runs successfully from command line
+- [x] Processes sample dataset without errors
+- [x] Generates both required output files
+- [x] Output CSVs have correct schema
+- [x] Top 5 cities displayed with proper formatting
+- [x] Error messages are clear and actionable
+- [x] Code follows project style guidelines (type hints, docstrings)
+- [x] Integration verified with downstream Story 6.1 (Streamlit app can load the output files)
 
