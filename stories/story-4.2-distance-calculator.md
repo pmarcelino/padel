@@ -124,13 +124,13 @@ Use **geopy** library for accurate distance calculations:
 
 ## Acceptance Criteria
 
-- [ ] **AC-4.2.1**: Use geopy for accurate geodesic distance calculations
-- [ ] **AC-4.2.2**: Calculate city center from facility coordinates (average lat/lng)
-- [ ] **AC-4.2.3**: Find nearest neighbor distances to facilities in other cities
-- [ ] **AC-4.2.4**: Implement travel willingness radius based on population size
-- [ ] **AC-4.2.5**: Unit tests with known coordinates validate distance accuracy (±1%)
-- [ ] **AC-4.2.6**: Handle edge cases (empty lists, single city, no neighbors)
-- [ ] **AC-4.2.7**: All methods are static (no instance state)
+- [x] **AC-4.2.1**: Use geopy for accurate geodesic distance calculations
+- [x] **AC-4.2.2**: Calculate city center from facility coordinates (average lat/lng)
+- [x] **AC-4.2.3**: Find nearest neighbor distances to facilities in other cities
+- [x] **AC-4.2.4**: Implement travel willingness radius based on population size
+- [x] **AC-4.2.5**: Unit tests with known coordinates validate distance accuracy (±1%)
+- [x] **AC-4.2.6**: Handle edge cases (empty lists, single city, no neighbors)
+- [x] **AC-4.2.7**: All methods are static (no instance state)
 
 ## Test Scenarios
 
@@ -227,12 +227,12 @@ for stats in city_stats:
 
 ## Success Criteria
 
-- [ ] All acceptance criteria met
-- [ ] Unit tests achieve 100% code coverage
-- [ ] Distance calculations validated against Google Maps for known city pairs
-- [ ] Performance: Processes 100 facilities in <1 second
-- [ ] No external API calls (pure calculation)
-- [ ] Documentation complete with examples
+- [x] All acceptance criteria met
+- [x] Unit tests achieve 100% code coverage
+- [x] Distance calculations validated against Google Maps for known city pairs
+- [x] Performance: Processes 100 facilities in <1 second
+- [x] No external API calls (pure calculation)
+- [x] Documentation complete with examples
 
 ## References
 

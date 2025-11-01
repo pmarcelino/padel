@@ -183,23 +183,23 @@ inverted_weight = 1 - normalized_value
 
 ## Acceptance Criteria
 
-- [ ] `OpportunityScorer` class implemented
-- [ ] `calculate_scores()` method normalizes all four weight components
-- [ ] Population weight normalized correctly (higher population = higher weight)
-- [ ] Saturation weight normalized and inverted (lower saturation = higher weight)
-- [ ] Quality gap weight normalized and inverted (lower rating = higher weight)
-- [ ] Geographic gap weight normalized correctly (larger distance = higher weight)
-- [ ] Geographic gap capped at 20km maximum
-- [ ] Final opportunity score is between 0-100
-- [ ] All individual weights are between 0-1
-- [ ] Edge cases handled (None values, single city, zero variance)
-- [ ] **Formula weights (0.2, 0.3, 0.2, 0.3) sum to 1.0 and are validated at class level**
-- [ ] **Weight validation ensures formula weights sum exactly to 1.0**
-- [ ] Formula weights match specification (0.2, 0.3, 0.2, 0.3)
-- [ ] Method calls `CityStats.calculate_opportunity_score()` to set final score
-- [ ] Unit tests validate score calculations
-- [ ] Unit tests cover all edge cases
-- [ ] **Unit test verifies weight sum validation**
+- [x] `OpportunityScorer` class implemented
+- [x] `calculate_scores()` method normalizes all four weight components
+- [x] Population weight normalized correctly (higher population = higher weight)
+- [x] Saturation weight normalized and inverted (lower saturation = higher weight)
+- [x] Quality gap weight normalized and inverted (lower rating = higher weight)
+- [x] Geographic gap weight normalized correctly (larger distance = higher weight)
+- [x] Geographic gap capped at 20km maximum
+- [x] Final opportunity score is between 0-100
+- [x] All individual weights are between 0-1
+- [x] Edge cases handled (None values, single city, zero variance)
+- [x] **Formula weights (0.2, 0.3, 0.2, 0.3) sum to 1.0 and are validated at class level**
+- [x] **Weight validation ensures formula weights sum exactly to 1.0**
+- [x] Formula weights match specification (0.2, 0.3, 0.2, 0.3)
+- [x] Method calls `CityStats.calculate_opportunity_score()` to set final score
+- [x] Unit tests validate score calculations
+- [x] Unit tests cover all edge cases
+- [x] **Unit test verifies weight sum validation**
 
 ## Files to Create
 

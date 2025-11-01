@@ -92,23 +92,23 @@ The aggregator must include population data for all 15 Algarve municipalities:
 
 ## Acceptance Criteria
 
-- [ ] `CityAggregator` class implemented with `CITY_POPULATIONS` constant
-- [ ] `aggregate()` method accepts `List[Facility]` and returns `List[CityStats]`
-- [ ] Groups facilities by city correctly
-- [ ] Calculates total facilities per city
-- [ ] Calculates average rating (ignoring null values)
-- [ ] Calculates median rating (ignoring null values)
-- [ ] Returns `None` for avg/median rating when no ratings exist
-- [ ] Calculates total review counts by summing all facility reviews
-- [ ] Calculates geographic center (mean lat/lng)
-- [ ] Looks up population from `CITY_POPULATIONS` dictionary
-- [ ] Calculates facilities per capita (per 10,000 residents) when population available
-- [ ] Sets `facilities_per_capita` to `None` when population unavailable
-- [ ] Returns one `CityStats` object per unique city
-- [ ] Handles empty facility list (returns empty list)
-- [ ] Handles facilities with missing ratings gracefully
-- [ ] Unit tests cover all aggregation logic
-- [ ] Test coverage ≥ 90%
+- [x] `CityAggregator` class implemented with `CITY_POPULATIONS` constant
+- [x] `aggregate()` method accepts `List[Facility]` and returns `List[CityStats]`
+- [x] Groups facilities by city correctly
+- [x] Calculates total facilities per city
+- [x] Calculates average rating (ignoring null values)
+- [x] Calculates median rating (ignoring null values)
+- [x] Returns `None` for avg/median rating when no ratings exist
+- [x] Calculates total review counts by summing all facility reviews
+- [x] Calculates geographic center (mean lat/lng)
+- [x] Looks up population from `CITY_POPULATIONS` dictionary
+- [x] Calculates facilities per capita (per 10,000 residents) when population available
+- [x] Sets `facilities_per_capita` to `None` when population unavailable
+- [x] Returns one `CityStats` object per unique city
+- [x] Handles empty facility list (returns empty list)
+- [x] Handles facilities with missing ratings gracefully
+- [x] Unit tests cover all aggregation logic
+- [x] Test coverage ≥ 90%
 
 ## Files to Create
 
@@ -129,47 +129,47 @@ tests/test_analyzers/
 ### Unit Tests (`test_aggregator.py`)
 
 **Basic Functionality:**
-- [ ] Test aggregation with valid facilities from multiple cities
-- [ ] Test aggregation with facilities from single city
-- [ ] Test aggregation with empty facility list
-- [ ] Test city grouping (facilities correctly grouped by city)
+- [x] Test aggregation with valid facilities from multiple cities
+- [x] Test aggregation with facilities from single city
+- [x] Test aggregation with empty facility list
+- [x] Test city grouping (facilities correctly grouped by city)
 
 **Rating Calculations:**
-- [ ] Test average rating calculation with valid ratings
-- [ ] Test median rating calculation with valid ratings
-- [ ] Test rating calculation ignores null/None values
-- [ ] Test returns None for avg/median when no ratings exist
-- [ ] Test rating calculation with mixed null and valid values
+- [x] Test average rating calculation with valid ratings
+- [x] Test median rating calculation with valid ratings
+- [x] Test rating calculation ignores null/None values
+- [x] Test returns None for avg/median when no ratings exist
+- [x] Test rating calculation with mixed null and valid values
 
 **Count Calculations:**
-- [ ] Test total facilities count per city
-- [ ] Test total review count summation
-- [ ] Test review count with zero reviews
+- [x] Test total facilities count per city
+- [x] Test total review count summation
+- [x] Test review count with zero reviews
 
 **Geographic Calculations:**
-- [ ] Test center latitude calculation (mean)
-- [ ] Test center longitude calculation (mean)
-- [ ] Test geographic center with single facility
-- [ ] Test geographic center with multiple facilities
+- [x] Test center latitude calculation (mean)
+- [x] Test center longitude calculation (mean)
+- [x] Test geographic center with single facility
+- [x] Test geographic center with multiple facilities
 
 **Population & Per Capita:**
-- [ ] Test population lookup for known cities
-- [ ] Test population lookup for unknown cities (returns None)
-- [ ] Test facilities per capita calculation (correct formula)
-- [ ] Test facilities per capita when population is None
-- [ ] Test facilities per capita calculation precision
+- [x] Test population lookup for known cities
+- [x] Test population lookup for unknown cities (returns None)
+- [x] Test facilities per capita calculation (correct formula)
+- [x] Test facilities per capita when population is None
+- [x] Test facilities per capita calculation precision
 
 **Edge Cases:**
-- [ ] Test with facility having no reviews (review_count=0)
-- [ ] Test with all facilities having null ratings
-- [ ] Test with city name not in CITY_POPULATIONS
-- [ ] Test DataFrame conversion and grouping
-- [ ] Test with very large numbers (overflow protection)
+- [x] Test with facility having no reviews (review_count=0)
+- [x] Test with all facilities having null ratings
+- [x] Test with city name not in CITY_POPULATIONS
+- [x] Test DataFrame conversion and grouping
+- [x] Test with very large numbers (overflow protection)
 
 **Integration:**
-- [ ] Test output CityStats objects are valid Pydantic models
-- [ ] Test all returned CityStats have required fields populated
-- [ ] Test with realistic sample data (10+ facilities, 3+ cities)
+- [x] Test output CityStats objects are valid Pydantic models
+- [x] Test all returned CityStats have required fields populated
+- [x] Test with realistic sample data (10+ facilities, 3+ cities)
 
 ## Technical Notes
 
