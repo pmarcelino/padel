@@ -140,36 +140,36 @@ class DataCleaner:
 ## Acceptance Criteria
 
 ### AC1: Coordinate Filtering
-- [ ] Given a facility with latitude = 36.90 (below minimum), it is removed
-- [ ] Given a facility with latitude = 37.45 (above maximum), it is removed
-- [ ] Given a facility with longitude = -9.1 (below minimum), it is removed
-- [ ] Given a facility with longitude = -7.3 (above maximum), it is removed
-- [ ] Given a facility with valid Algarve coordinates, it is kept
+- [x] Given a facility with latitude = 36.90 (below minimum), it is removed
+- [x] Given a facility with latitude = 37.45 (above maximum), it is removed
+- [x] Given a facility with longitude = -9.1 (below minimum), it is removed
+- [x] Given a facility with longitude = -7.3 (above maximum), it is removed
+- [x] Given a facility with valid Algarve coordinates, it is kept
 
 ### AC2: City Validation
-- [ ] Given a facility with city = None, it is removed
-- [ ] Given a facility with city = "", it is removed
-- [ ] Given a facility with city = "Albufeira", it is kept
+- [x] Given a facility with city = None, it is removed
+- [x] Given a facility with city = "", it is removed
+- [x] Given a facility with city = "Albufeira", it is kept
 
 ### AC3: City Normalization
-- [ ] Given city = " albufeira ", output city = "Albufeira"
-- [ ] Given city = "FARO", output city = "Faro"
-- [ ] Given city = "lagos  ", output city = "Lagos"
+- [x] Given city = " albufeira ", output city = "Albufeira"
+- [x] Given city = "FARO", output city = "Faro"
+- [x] Given city = "lagos  ", output city = "Lagos"
 
 ### AC4: Rating Validation
-- [ ] Given rating = -1.0, output rating = None
-- [ ] Given rating = 5.5, output rating = None
-- [ ] Given rating = None, output rating = None
-- [ ] Given rating = 4.3, output rating = 4.3
+- [x] Given rating = -1.0, output rating = None
+- [x] Given rating = 5.5, output rating = None
+- [x] Given rating = None, output rating = None
+- [x] Given rating = 4.3, output rating = 4.3
 
 ### AC5: DataFrame Conversion
-- [ ] Given list of facilities, returns DataFrame with correct columns
-- [ ] DataFrame has same number of rows as input list
-- [ ] All facility attributes are present as columns
+- [x] Given list of facilities, returns DataFrame with correct columns
+- [x] DataFrame has same number of rows as input list
+- [x] All facility attributes are present as columns
 
 ### AC6: Test Coverage
-- [ ] Unit test coverage = 100%
-- [ ] All edge cases tested
+- [x] Unit test coverage = 100%
+- [x] All edge cases tested
 
 ## Test Cases
 
@@ -329,20 +329,20 @@ def clean_facilities(facilities):
 
 ## Definition of Done
 
-- [ ] `DataCleaner` class implemented in `src/processors/cleaner.py`
-- [ ] `clean_facilities()` method works as specified
-- [ ] `to_dataframe()` method works as specified
-- [ ] All coordinate bounds correctly enforced
-- [ ] City validation working
-- [ ] Rating validation working
-- [ ] City normalization delegated to Pydantic model
-- [ ] Comprehensive unit tests in `tests/test_processors/test_cleaner.py`
-- [ ] 100% code coverage achieved
-- [ ] All test cases pass
-- [ ] Type hints on all methods
-- [ ] Docstrings on class and methods
-- [ ] Code follows project style (black formatted)
-- [ ] No linting errors
+- [x] `DataCleaner` class implemented in `src/processors/cleaner.py`
+- [x] `clean_facilities()` method works as specified
+- [x] `to_dataframe()` method works as specified
+- [x] All coordinate bounds correctly enforced
+- [x] City validation working
+- [x] Rating validation working
+- [x] City normalization delegated to Pydantic model
+- [x] Comprehensive unit tests in `tests/test_processors/test_cleaner.py`
+- [x] 100% code coverage achieved
+- [x] All test cases pass
+- [x] Type hints on all methods
+- [x] Docstrings on class and methods
+- [x] Code follows project style (black formatted)
+- [x] No linting errors
 
 ## Future Enhancements (Out of Scope)
 

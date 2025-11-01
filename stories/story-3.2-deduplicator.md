@@ -5,7 +5,7 @@
 - **Layer**: 3 (Processing)
 - **Dependencies**: Story 0.1 (Data Models)
 - **Estimated Effort**: Small
-- **Status**: Not Started
+- **Status**: Complete
 
 ## Overview
 
@@ -136,32 +136,32 @@ class Deduplicator:
 
 ## Acceptance Criteria
 
-- [ ] **AC1**: Remove exact place_id duplicates
+- [x] **AC1**: Remove exact place_id duplicates
   - Given 10 facilities with 3 duplicate place_ids
   - When deduplicate() is called
   - Then return 7 unique facilities
 
-- [ ] **AC2**: Remove fuzzy name + location duplicates
+- [x] **AC2**: Remove fuzzy name + location duplicates
   - Given facilities with same name and coordinates (±0.001)
   - When deduplicate() is called
   - Then keep only one facility per location
 
-- [ ] **AC3**: Preserve distinct facilities in same city
+- [x] **AC3**: Preserve distinct facilities in same city
   - Given 2 facilities with different names in same city
   - When deduplicate() is called
   - Then return both facilities
 
-- [ ] **AC4**: Handle case-insensitive name matching
+- [x] **AC4**: Handle case-insensitive name matching
   - Given "Padel Club" and "padel club" at same location
   - When deduplicate() is called
   - Then return only one facility
 
-- [ ] **AC5**: Keep facility with highest completeness score
+- [x] **AC5**: Keep facility with highest completeness score
   - Given two duplicate facilities with different field completeness
   - When deduplicate() is called
   - Then keep the facility with more non-null optional fields
 
-- [ ] **AC6**: Unit tests with duplicate fixtures
+- [x] **AC6**: Unit tests with duplicate fixtures
   - Test exact duplicates
   - Test fuzzy duplicates
   - Test legitimate distinct facilities
@@ -253,13 +253,13 @@ def fuzzy_duplicate_facilities():
 
 ## Success Criteria
 
-- [ ] All unit tests passing
-- [ ] 100% code coverage
-- [ ] Removes exact duplicates (place_id)
-- [ ] Removes fuzzy duplicates (name + location)
-- [ ] Preserves all legitimate distinct facilities
-- [ ] Execution time < 1 second for 100 facilities
-- [ ] Code reviewed and approved
+- [x] All unit tests passing
+- [x] 100% code coverage
+- [x] Removes exact duplicates (place_id)
+- [x] Removes fuzzy duplicates (name + location)
+- [x] Preserves all legitimate distinct facilities
+- [x] Execution time < 1 second for 100 facilities
+- [x] Code reviewed and approved
 
 ## Notes
 
