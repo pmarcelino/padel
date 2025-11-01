@@ -180,19 +180,19 @@ def log_llm_cost(model: str, input_tokens: int, output_tokens: int):
 
 ## Acceptance Criteria
 
-- [ ] Support both OpenAI and Anthropic providers
-- [ ] JSON-structured output with confidence score
-- [ ] Confidence threshold of 0.6+ to return result
-- [ ] Graceful handling of API errors
-- [ ] Only update facility if `indoor_outdoor` is None
-- [ ] Skip analysis if no reviews available
-- [ ] Unit tests with mocked LLM responses
-- [ ] Test both OpenAI and Anthropic code paths
-- [ ] Cost optimization (use cheap models, limit reviews)
-- [ ] **Cost tracking implemented (log API usage with token counts and estimated cost)**
-- [ ] Type hints throughout
-- [ ] Docstrings for all public methods
-- [ ] Integration tests marked as optional
+- [x] Support both OpenAI and Anthropic providers
+- [x] JSON-structured output with confidence score
+- [x] Confidence threshold of 0.6+ to return result
+- [x] Graceful handling of API errors
+- [x] Only update facility if `indoor_outdoor` is None
+- [x] Skip analysis if no reviews available
+- [x] Unit tests with mocked LLM responses
+- [x] Test both OpenAI and Anthropic code paths
+- [x] Cost optimization (use cheap models, limit reviews)
+- [x] **Cost tracking implemented (log API usage with token counts and estimated cost)**
+- [x] Type hints throughout
+- [x] Docstrings for all public methods
+- [x] Integration tests marked as optional
 
 ---
 
