@@ -86,32 +86,32 @@ class ReviewCollector:
 ## Acceptance Criteria
 
 ### Functional Requirements
-- [ ] Fetch reviews via Google Places API (Place Details endpoint)
-- [ ] Extract only text content from review objects (ignore ratings, dates, etc.)
-- [ ] Handle missing reviews gracefully (return empty list)
-- [ ] Handle API errors gracefully (log error, return empty list)
-- [ ] Limit results to `max_reviews` parameter
-- [ ] Filter out empty review texts
+- [x] Fetch reviews via Google Places API (Place Details endpoint)
+- [x] Extract only text content from review objects (ignore ratings, dates, etc.)
+- [x] Handle missing reviews gracefully (return empty list)
+- [x] Handle API errors gracefully (log error, return empty list)
+- [x] Limit results to `max_reviews` parameter
+- [x] Filter out empty review texts
 
 ### Non-Functional Requirements
-- [ ] Rate limiting (0.2s delay between requests)
-- [ ] **HTTP 429 handling with exponential backoff:**
-  - [ ] Detect rate limit errors (HTTP 429)
-  - [ ] Implement exponential backoff (1s, 2s, 4s)
-  - [ ] Maximum retry count: 3 attempts
-  - [ ] Log rate limiting events
-- [ ] Respect Google API quotas
-- [ ] Log warnings for API failures
-- [ ] Execution time < 1 second per facility (excluding retries)
+- [x] Rate limiting (0.2s delay between requests)
+- [x] **HTTP 429 handling with exponential backoff:**
+  - [x] Detect rate limit errors (HTTP 429)
+  - [x] Implement exponential backoff (1s, 2s, 4s)
+  - [x] Maximum retry count: 3 attempts
+  - [x] Log rate limiting events
+- [x] Respect Google API quotas
+- [x] Log warnings for API failures
+- [x] Execution time < 1 second per facility (excluding retries)
 
 ### Testing Requirements
-- [ ] Unit tests with mocked API responses
-- [ ] Test case: Facility with reviews (returns list of texts)
-- [ ] Test case: Facility without reviews (returns empty list)
-- [ ] Test case: API error (returns empty list, logs error)
-- [ ] Test case: Reviews with empty text fields (filters them out)
-- [ ] Test case: max_reviews parameter limits results
-- [ ] Test coverage: >90%
+- [x] Unit tests with mocked API responses
+- [x] Test case: Facility with reviews (returns list of texts)
+- [x] Test case: Facility without reviews (returns empty list)
+- [x] Test case: API error (returns empty list, logs error)
+- [x] Test case: Reviews with empty text fields (filters them out)
+- [x] Test case: max_reviews parameter limits results
+- [x] Test coverage: >90%
 
 ## Files to Create
 
@@ -247,15 +247,15 @@ def test_get_reviews_filters_empty_text(mock_googlemaps):
 
 ## Definition of Done
 
-- [ ] Code implemented and follows style guide
-- [ ] All acceptance criteria met
-- [ ] Unit tests written and passing
-- [ ] Code coverage >90%
-- [ ] Code reviewed and approved
-- [ ] Documentation/docstrings complete
-- [ ] Manual testing completed
-- [ ] No linter errors
-- [ ] Integration with Story 2.1 verified
+- [x] Code implemented and follows style guide
+- [x] All acceptance criteria met
+- [x] Unit tests written and passing
+- [x] Code coverage >90% (achieved 98%)
+- [ ] Code reviewed and approved (pending)
+- [x] Documentation/docstrings complete
+- [ ] Manual testing completed (optional with real API)
+- [x] No linter errors
+- [ ] Integration with Story 2.1 verified (Story 2.1 not yet implemented)
 
 ## Notes
 

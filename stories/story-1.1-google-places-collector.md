@@ -140,18 +140,18 @@ Follow error handling patterns defined in Story 0.2:
 
 ## Acceptance Criteria
 
-- [ ] Search with multiple query variations (at least 4 different queries)
-- [ ] Pagination handling with proper delays (2s between pages)
-- [ ] Rate limiting implemented (0.2s delay between requests)
-- [ ] Caching enabled by default using `@cache_response` decorator
-- [ ] City extraction for all 15 Algarve municipalities
-- [ ] Returns 90%+ of known facilities in the region
-- [ ] Deduplication by `place_id` within single collection run
-- [ ] Unit tests with mocked API responses
-- [ ] Integration test with real API (optional, marked with `@pytest.mark.integration`)
-- [ ] Proper error handling and logging
-- [ ] Type hints throughout
-- [ ] Docstrings for all public methods
+- [x] Search with multiple query variations (at least 4 different queries)
+- [x] Pagination handling with proper delays (2s between pages)
+- [x] Rate limiting implemented (0.2s delay between requests)
+- [x] Caching enabled by default using `@cache_response` decorator
+- [x] City extraction for all 15 Algarve municipalities
+- [ ] Returns 90%+ of known facilities in the region (requires real API testing)
+- [x] Deduplication by `place_id` within single collection run
+- [x] Unit tests with mocked API responses
+- [x] Integration test with real API (optional, marked with `@pytest.mark.integration`)
+- [x] Proper error handling and logging
+- [x] Type hints throughout
+- [x] Docstrings for all public methods
 
 ---
 
