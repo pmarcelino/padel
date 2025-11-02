@@ -7,10 +7,17 @@ facility data and opportunity scores across the Algarve region.
 Launch with: streamlit run app/app.py
 """
 
+import sys
+from pathlib import Path
+
+# Add project root to path so we can import from src
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 import pandas as pd
 import streamlit as st
 
-from app.core import calculate_metrics, filter_cities, filter_facilities, load_data
+from core import calculate_metrics, filter_cities, filter_facilities, load_data
 
 # ============================================================================
 # Page Configuration
