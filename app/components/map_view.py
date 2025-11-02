@@ -231,48 +231,116 @@ def create_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame) -> folium.M
         )
         heat_map.add_to(m)
     
-    # Add layer control to toggle groups
-    folium.LayerControl(collapsed=False).add_to(m)
-
-    # Ensure the map correctly sizes itself when rendered inside Streamlit tabs
+    # Add custom HTML legend that's always visible (no JavaScript initialization needed)
     map_id = m.get_name()
-    resize_script = f"""
+    
+    # Create layer name to group mapping
+    layer_info = [
+        ("facility_green", "🟢 Green Facilities (≥4.5⭐)", "green"),
+        ("facility_blue", "🔵 Blue Facilities (≥4.0⭐)", "blue"),
+        ("facility_orange", "🟠 Orange Facilities (≥3.5⭐)", "orange"),
+        ("facility_red", "🔴 Red Facilities (<3.5⭐)", "red"),
+        ("facility_gray", "⚫ Gray Facilities (No Rating)", "gray"),
+        ("city_centers", "🟣 City Centers", "purple"),
+        ("heatmap", "🔥 Density Heatmap", "heat"),
+    ]
+    
+    legend_html = f"""
+    <div id="map-legend" style="
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+        z-index: 1000;
+        font-family: Arial, sans-serif;
+        font-size: 13px;
+        max-width: 280px;
+    ">
+        <div style="font-weight: bold; margin-bottom: 8px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">
+            📍 Map Layers
+        </div>
+        <div id="legend-items">
+    """
+    
+    for layer_id, layer_name, color in layer_info:
+        legend_html += f"""
+            <div style="margin: 5px 0;">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" 
+                           checked 
+                           onchange="toggleLayer_{map_id}('{layer_id}')"
+                           style="margin-right: 8px; cursor: pointer;">
+                    <span>{layer_name}</span>
+                </label>
+            </div>
+        """
+    
+    legend_html += """
+        </div>
+    </div>
+    
     <script>
-    (function ensureMapResizes() {{
-        function attachObserver(map) {{
+    (function() {
+        const layerMap = {
+    """
+    
+    # Map layer IDs to their Leaflet layer group names
+    legend_html += f"""
+            'facility_green': '🟢 Green Facilities (≥4.5⭐)',
+            'facility_blue': '🔵 Blue Facilities (≥4.0⭐)',
+            'facility_orange': '🟠 Orange Facilities (≥3.5⭐)',
+            'facility_red': '🔴 Red Facilities (<3.5⭐)',
+            'facility_gray': '⚫ Gray Facilities (No Rating)',
+            'city_centers': '🟣 City Centers',
+    """
+    
+    if len(facilities_df) > 0:
+        legend_html += f"""
+            'heatmap': '🔥 Density Heatmap',
+        """
+    
+    legend_html += f"""
+        }};
+        
+        window.toggleLayer_{map_id} = function(layerId) {{
+            const map = window.{map_id};
             if (!map) {{
+                setTimeout(() => window.toggleLayer_{map_id}(layerId), 100);
                 return;
             }}
-            const invalidate = () => map.invalidateSize(true);
-            invalidate();
-            window.addEventListener('resize', invalidate);
-            document.addEventListener('visibilitychange', invalidate);
-
-            const frame = window.frameElement;
-            if (frame) {{
-                const observer = new MutationObserver(() => invalidate());
-                observer.observe(frame, {{ attributes: true, childList: true, subtree: true }});
-            }}
-        }}
-
-        function waitForMap() {{
+            
+            const layerName = layerMap[layerId];
+            if (!layerName) return;
+            
+            map.eachLayer(function(layer) {{
+                if (layer.options && layer.options.name === layerName) {{
+                    if (map.hasLayer(layer)) {{
+                        map.removeLayer(layer);
+                    }} else {{
+                        map.addLayer(layer);
+                    }}
+                }}
+            }});
+            
+            // Invalidate size to ensure proper rendering
+            setTimeout(() => map.invalidateSize(true), 50);
+        }};
+        
+        // Initial map size fix
+        setTimeout(function() {{
             const map = window.{map_id};
             if (map) {{
-                attachObserver(map);
-            }} else {{
-                setTimeout(waitForMap, 150);
+                map.invalidateSize(true);
             }}
-        }}
-
-        if (document.readyState === 'loading') {{
-            document.addEventListener('DOMContentLoaded', waitForMap);
-        }} else {{
-            waitForMap();
-        }}
+        }}, 200);
     }})();
     </script>
     """
-    m.get_root().html.add_child(folium.Element(resize_script))
+    
+    m.get_root().html.add_child(folium.Element(legend_html))
  
     return m
 
