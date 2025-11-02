@@ -233,6 +233,46 @@ def create_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame) -> folium.M
     
     # Add layer control to toggle groups
     folium.LayerControl(collapsed=False).add_to(m)
-    
+
+    # Ensure the map correctly sizes itself when rendered inside Streamlit tabs
+    map_id = m.get_name()
+    resize_script = f"""
+    <script>
+    (function ensureMapResizes() {{
+        function attachObserver(map) {{
+            if (!map) {{
+                return;
+            }}
+            const invalidate = () => map.invalidateSize(true);
+            invalidate();
+            window.addEventListener('resize', invalidate);
+            document.addEventListener('visibilitychange', invalidate);
+
+            const frame = window.frameElement;
+            if (frame) {{
+                const observer = new MutationObserver(() => invalidate());
+                observer.observe(frame, {{ attributes: true, childList: true, subtree: true }});
+            }}
+        }}
+
+        function waitForMap() {{
+            const map = window.{map_id};
+            if (map) {{
+                attachObserver(map);
+            }} else {{
+                setTimeout(waitForMap, 150);
+            }}
+        }}
+
+        if (document.readyState === 'loading') {{
+            document.addEventListener('DOMContentLoaded', waitForMap);
+        }} else {{
+            waitForMap();
+        }}
+    }})();
+    </script>
+    """
+    m.get_root().html.add_child(folium.Element(resize_script))
+ 
     return m
 

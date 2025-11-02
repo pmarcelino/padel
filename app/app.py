@@ -17,6 +17,9 @@ sys.path.insert(0, str(project_root))
 import pandas as pd
 import streamlit as st
 
+import hashlib
+import json
+
 from core import calculate_metrics, filter_cities, filter_facilities, load_data
 
 # ============================================================================
@@ -230,8 +233,8 @@ def render_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame):
         - Heatmap layer for facility density
         - Layer control for toggling heatmap
     """
-    from streamlit_folium import st_folium
     from app.components.map_view import create_map
+    import streamlit.components.v1 as components
 
     st.subheader("🗺️ Interactive Map")
     
@@ -246,15 +249,31 @@ def render_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame):
     
     # Create and display the map
     try:
-        import streamlit.components.v1 as components
-        
         map_obj = create_map(facilities_df, cities_df)
-        
-        # Render map HTML directly using Streamlit components
-        # This is more reliable than st_folium
-        map_html = map_obj._repr_html_()
-        components.html(map_html, height=650, scrolling=False)
-        
+        map_html = map_obj.get_root().render()
+
+        facility_ids = (
+            facilities_df["place_id"].astype(str).tolist()
+            if "place_id" in facilities_df.columns
+            else facilities_df.index.astype(str).tolist()
+        )
+        city_ids = (
+            cities_df["city"].astype(str).tolist()
+            if "city" in cities_df.columns
+            else cities_df.index.astype(str).tolist()
+        )
+
+        signature_payload = {
+            "facility_count": len(facilities_df),
+            "city_count": len(cities_df),
+            "facility_ids": facility_ids,
+            "city_ids": city_ids,
+        }
+        signature = hashlib.md5(json.dumps(signature_payload, sort_keys=True).encode("utf-8")).hexdigest()
+        map_html_with_signature = f"{map_html}\n<!-- map-signature:{signature} -->"
+
+        components.html(map_html_with_signature, height=650, scrolling=False)
+ 
     except Exception as e:
         st.error(f"Error creating map: {str(e)}")
         import traceback

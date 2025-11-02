@@ -82,7 +82,7 @@ class TestBasicSearch:
         mock_client_class.return_value = mock_client
 
         # Mock text search response
-        mock_client.places_nearby.return_value = {
+        mock_client.places.return_value = {
             "results": [
                 {
                     "place_id": "place_123",
@@ -127,8 +127,8 @@ class TestBasicSearch:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
 
-        # Mock places_nearby to return one result per query
-        mock_client.places_nearby.return_value = {
+        # Mock places to return one result per query
+        mock_client.places.return_value = {
             "results": [{"place_id": "place_parse_test_123"}],
             "status": "OK",
         }
@@ -183,11 +183,11 @@ class TestSearchVariations:
         # Track queries made
         queries_made = []
 
-        def mock_places_nearby(**kwargs):
+        def mock_places(**kwargs):
             queries_made.append(kwargs.get("query"))
             return {"results": [], "status": "OK"}
 
-        mock_client.places_nearby.side_effect = mock_places_nearby
+        mock_client.places.side_effect = mock_places
 
         collector = GooglePlacesCollector(api_key="test_key")
         collector.search_padel_facilities(region="Algarve, Portugal")
@@ -211,7 +211,7 @@ class TestPagination:
         # Second call returns final results
         call_count = 0
 
-        def mock_places_nearby(**kwargs):
+        def mock_places(**kwargs):
             nonlocal call_count
             call_count += 1
             if call_count == 1 and "page_token" not in kwargs:
@@ -227,7 +227,7 @@ class TestPagination:
                 }
             return {"results": [], "status": "OK"}
 
-        mock_client.places_nearby.side_effect = mock_places_nearby
+        mock_client.places.side_effect = mock_places
 
         # Mock place details
         def mock_place(**kwargs):
@@ -266,7 +266,7 @@ class TestDeduplication:
         mock_client_class.return_value = mock_client
 
         # Return same place_id from multiple queries
-        def mock_places_nearby(**kwargs):
+        def mock_places(**kwargs):
             return {
                 "results": [
                     {"place_id": "place_123"},
@@ -276,7 +276,7 @@ class TestDeduplication:
                 "status": "OK",
             }
 
-        mock_client.places_nearby.side_effect = mock_places_nearby
+        mock_client.places.side_effect = mock_places
 
         # Track how many times place details is called
         place_calls = []
@@ -326,7 +326,7 @@ class TestCityExtraction:
         ]
 
         for address, expected_city in test_cases:
-            mock_client.places_nearby.return_value = {
+            mock_client.places.return_value = {
                 "results": [{"place_id": f"place_{expected_city}"}],
                 "status": "OK",
             }
@@ -361,7 +361,7 @@ class TestFacilityTypeMapping:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
 
-        mock_client.places_nearby.return_value = {
+        mock_client.places.return_value = {
             "results": [{"place_id": "place_123"}],
             "status": "OK",
         }
@@ -391,7 +391,7 @@ class TestFacilityTypeMapping:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
 
-        mock_client.places_nearby.return_value = {
+        mock_client.places.return_value = {
             "results": [{"place_id": "place_123"}],
             "status": "OK",
         }
@@ -421,7 +421,7 @@ class TestFacilityTypeMapping:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
 
-        mock_client.places_nearby.return_value = {
+        mock_client.places.return_value = {
             "results": [{"place_id": "place_123"}],
             "status": "OK",
         }
@@ -458,7 +458,7 @@ class TestErrorHandling:
         # First query succeeds, second raises error
         call_count = 0
 
-        def mock_places_nearby(**kwargs):
+        def mock_places(**kwargs):
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -469,7 +469,7 @@ class TestErrorHandling:
             else:
                 raise Exception("API Error")
 
-        mock_client.places_nearby.side_effect = mock_places_nearby
+        mock_client.places.side_effect = mock_places
 
         mock_client.place.return_value = {
             "result": {
@@ -498,7 +498,7 @@ class TestErrorHandling:
         mock_client_class.return_value = mock_client
 
         # Use unique place_id for this test
-        mock_client.places_nearby.return_value = {
+        mock_client.places.return_value = {
             "results": [{"place_id": "place_invalid_999"}],
             "status": "OK",
         }
@@ -530,7 +530,7 @@ class TestRateLimiting:
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
 
-        mock_client.places_nearby.return_value = {
+        mock_client.places.return_value = {
             "results": [{"place_id": "place_123"}, {"place_id": "place_456"}],
             "status": "OK",
         }

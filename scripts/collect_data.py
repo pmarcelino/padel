@@ -170,17 +170,9 @@ def validate_configuration(args: argparse.Namespace) -> bool:
         Prints error messages to stderr if validation fails
     """
     # Check Google API key
-    try:
-        google_api_key = settings.google_api_key
-        if not google_api_key or len(google_api_key.strip()) == 0:
-            print("❌ Error: GOOGLE_API_KEY environment variable is not set", file=sys.stderr)
-            print("\nPlease set your Google API key:", file=sys.stderr)
-            print("  export GOOGLE_API_KEY='your-api-key-here'", file=sys.stderr)
-            print("\nOr add it to your .env file:", file=sys.stderr)
-            print("  GOOGLE_API_KEY=your-api-key-here", file=sys.stderr)
-            return False
-    except Exception as e:
-        print(f"❌ Error: Failed to load GOOGLE_API_KEY: {e}", file=sys.stderr)
+    google_api_key = os.environ.get("GOOGLE_API_KEY", "")
+    if not google_api_key or len(google_api_key.strip()) == 0:
+        print("❌ Error: GOOGLE_API_KEY environment variable is not set", file=sys.stderr)
         print("\nPlease set your Google API key:", file=sys.stderr)
         print("  export GOOGLE_API_KEY='your-api-key-here'", file=sys.stderr)
         print("\nOr add it to your .env file:", file=sys.stderr)
@@ -190,7 +182,7 @@ def validate_configuration(args: argparse.Namespace) -> bool:
     # Check LLM API key if enrichment is requested
     if args.enrich_indoor_outdoor:
         if args.llm_provider == "openai":
-            openai_key = settings.openai_api_key
+            openai_key = os.environ.get("OPENAI_API_KEY", "")
             if not openai_key or len(openai_key.strip()) == 0:
                 print(
                     "❌ Error: OPENAI_API_KEY required for --enrich-indoor-outdoor",
@@ -200,7 +192,7 @@ def validate_configuration(args: argparse.Namespace) -> bool:
                 print("  export OPENAI_API_KEY='your-api-key-here'", file=sys.stderr)
                 return False
         elif args.llm_provider == "anthropic":
-            anthropic_key = settings.anthropic_api_key
+            anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
             if not anthropic_key or len(anthropic_key.strip()) == 0:
                 print(
                     "❌ Error: ANTHROPIC_API_KEY required for --enrich-indoor-outdoor",
