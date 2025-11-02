@@ -383,7 +383,8 @@ def render_overview(facilities_df: pd.DataFrame, cities_df: pd.DataFrame) -> Non
     """
     Render overview dashboard with basic charts.
 
-    Displays facilities bar chart and rating distribution pie chart in a 2-column layout.
+    Displays facilities bar chart and rating distribution pie chart in a 2-column layout,
+    followed by a detailed table of all facilities.
 
     Args:
         facilities_df: Filtered facilities DataFrame
@@ -404,6 +405,57 @@ def render_overview(facilities_df: pd.DataFrame, cities_df: pd.DataFrame) -> Non
     with col2:
         fig = create_rating_distribution_pie(facilities_df)
         st.plotly_chart(fig, use_container_width=True)
+
+    # Facilities table
+    st.subheader("📋 All Facilities")
+    
+    if len(facilities_df) > 0:
+        # Prepare table data
+        table_df = facilities_df[["name", "city", "review_count", "rating"]].copy()
+        table_df.columns = ["Facility Name", "City", "Reviews", "Rating"]
+        
+        # Sort by rating (descending), then by reviews (descending)
+        table_df = table_df.sort_values(
+            by=["Rating", "Reviews"], 
+            ascending=[False, False],
+            na_position="last"
+        )
+        
+        # Format rating to 1 decimal place, handle NaN
+        table_df["Rating"] = table_df["Rating"].apply(
+            lambda x: f"{x:.1f}" if pd.notna(x) and x > 0 else "N/A"
+        )
+        
+        # Reset index for cleaner display
+        table_df = table_df.reset_index(drop=True)
+        
+        # Display table with full width
+        st.dataframe(
+            table_df,
+            use_container_width=True,
+            height=400,
+            hide_index=True,
+        )
+        
+        # Show summary stats
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total Facilities", len(facilities_df))
+        with col2:
+            avg_reviews = facilities_df["review_count"].mean()
+            st.metric("Avg Reviews per Facility", f"{avg_reviews:.1f}")
+        with col3:
+            # Calculate average rating excluding 0 and NaN
+            rated_facilities = facilities_df[
+                (facilities_df["rating"].notna()) & (facilities_df["rating"] > 0)
+            ]
+            if len(rated_facilities) > 0:
+                avg_rating = rated_facilities["rating"].mean()
+                st.metric("Avg Rating", f"{avg_rating:.2f}")
+            else:
+                st.metric("Avg Rating", "N/A")
+    else:
+        st.info("No facilities to display")
 
 
 def render_analysis(cities_df: pd.DataFrame) -> None:
