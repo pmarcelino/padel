@@ -147,19 +147,19 @@ Each city should have a marker at its center coordinates with:
 
 ## Acceptance Criteria
 
-- [ ] Map centers on Algarve region with appropriate zoom
-- [ ] All facilities displayed as CircleMarkers with correct color coding
-- [ ] Facility popups contain all required information
-- [ ] City markers display opportunity scores
-- [ ] Heatmap layer shows facility density
-- [ ] Layer control allows toggling heatmap
-- [ ] Tooltips work on hover for both facility and city markers
-- [ ] Map renders correctly in Streamlit via `st_folium()`
-- [ ] **No crashes when rating is null/NaN (displays "gray" color and "N/A" in popup)**
-- [ ] **No crashes when city population is None (displays "Unknown" in popup)**
-- [ ] **No crashes when city avg_rating is None (displays "N/A" in popup)**
-- [ ] External links open in new tab
-- [ ] Responsive and performant with 50+ markers
+- [x] Map centers on Algarve region with appropriate zoom
+- [x] All facilities displayed as CircleMarkers with correct color coding
+- [x] Facility popups contain all required information
+- [x] City markers display opportunity scores
+- [x] Heatmap layer shows facility density
+- [x] Layer control allows toggling heatmap
+- [x] Tooltips work on hover for both facility and city markers
+- [x] Map renders correctly in Streamlit via `st_folium()`
+- [x] **No crashes when rating is null/NaN (displays "gray" color and "N/A" in popup)**
+- [x] **No crashes when city population is None (displays "Unknown" in popup)**
+- [x] **No crashes when city avg_rating is None (displays "N/A" in popup)**
+- [x] External links open in new tab
+- [x] Responsive and performant with 50+ markers
 
 ## Files to Create
 
@@ -210,13 +210,13 @@ For Algarve region:
 Not applicable for this component (visualization component, better tested manually or with integration tests)
 
 ### Integration Tests
-- [ ] Test with empty DataFrames (both facilities and cities)
-- [ ] **Test with facilities having null ratings (should display gray markers)**
-- [ ] **Test with cities having null population (should display "Unknown" in popup)**
-- [ ] **Test with cities having null avg_rating (should display "N/A" in popup)**
-- [ ] Test with missing optional fields (google_url, indoor_outdoor, etc.)
-- [ ] Test with single facility
-- [ ] Test with large dataset (100+ facilities)
+- [x] Test with empty DataFrames (both facilities and cities)
+- [x] **Test with facilities having null ratings (should display gray markers)**
+- [x] **Test with cities having null population (should display "Unknown" in popup)**
+- [x] **Test with cities having null avg_rating (should display "N/A" in popup)**
+- [x] Test with missing optional fields (google_url, indoor_outdoor, etc.)
+- [x] Test with single facility
+- [x] Test with large dataset (100+ facilities)
 
 ### Manual Testing Checklist
 - [ ] Verify map loads and centers correctly

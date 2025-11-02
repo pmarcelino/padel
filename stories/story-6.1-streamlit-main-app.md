@@ -105,26 +105,26 @@ Apply filters to both DataFrames:
 ## Acceptance Criteria
 
 ### Functional Requirements
-- [ ] App loads successfully with valid data files
-- [ ] Displays error message with instructions if data files are missing
-- [ ] Sidebar filters update immediately when changed
-- [ ] Key metrics recalculate based on active filters
-- [ ] All three tabs render without errors
-- [ ] App is responsive and maintains state across tab switches
-- [ ] Data caching works (no reload on re-renders)
+- [x] App loads successfully with valid data files
+- [x] Displays error message with instructions if data files are missing
+- [x] Sidebar filters update immediately when changed
+- [x] Key metrics recalculate based on active filters
+- [x] All three tabs render without errors
+- [x] App is responsive and maintains state across tab switches
+- [x] Data caching works (no reload on re-renders)
 
 ### Non-Functional Requirements
-- [ ] Page load time < 2 seconds with cached data
-- [ ] Clean, modern UI with consistent styling
-- [ ] Wide layout utilizes full screen width
-- [ ] Sidebar is expanded by default
-- [ ] No console errors or warnings
+- [x] Page load time < 2 seconds with cached data
+- [x] Clean, modern UI with consistent styling
+- [x] Wide layout utilizes full screen width
+- [x] Sidebar is expanded by default
+- [x] No console errors or warnings
 
 ### Code Quality
-- [ ] Type hints for function parameters
-- [ ] Docstrings for main functions
-- [ ] Proper error handling with user-friendly messages
-- [ ] Code follows Python style guidelines (Black formatting)
+- [x] Type hints for function parameters
+- [x] Docstrings for main functions
+- [x] Proper error handling with user-friendly messages
+- [x] Code follows Python style guidelines (Black formatting)
 
 ## Files to Create
 
@@ -236,15 +236,15 @@ filtered_cities = cities_df[cities_df['city'].isin(selected_cities)]
 
 ## Definition of Done
 
-- [ ] Code is written and committed
-- [ ] App launches successfully with `streamlit run app/app.py`
-- [ ] All acceptance criteria are met
-- [ ] Manual testing checklist completed
-- [ ] Error handling tested with missing files
-- [ ] Code is formatted with Black
-- [ ] Comments and docstrings added
-- [ ] Screenshots of working app captured (optional)
-- [ ] Ready for Stories 6.2 and 6.3 integration
+- [x] Code is written and committed
+- [x] App launches successfully with `streamlit run app/app.py`
+- [x] All acceptance criteria are met
+- [x] Manual testing checklist completed
+- [x] Error handling tested with missing files
+- [x] Code is formatted with Black
+- [x] Comments and docstrings added
+- [x] Screenshots of working app captured (optional)
+- [x] Ready for Stories 6.2 and 6.3 integration
 
 ## Future Enhancements (Out of Scope)
 
