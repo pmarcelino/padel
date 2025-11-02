@@ -43,7 +43,6 @@ venv.bak/
 
 # Data files (keep structure, ignore data)
 data/raw/*.csv
-data/processed/*.csv
 data/cache/*.pkl
 data/cache/*.json
 data/exports/*.csv
