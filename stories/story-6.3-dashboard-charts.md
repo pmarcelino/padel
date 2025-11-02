@@ -139,58 +139,58 @@ def create_rating_boxplot_by_city(facilities_df: pd.DataFrame) -> go.Figure:
 
 ### Functional Requirements
 
-- [ ] **Chart 1**: Bar chart showing total facilities per city
+- [x] **Chart 1**: Bar chart showing total facilities per city
   - Sorted by facility count (descending)
   - Color-coded bars
   - Hover tooltips with exact counts
   
-- [ ] **Chart 2**: Bar chart showing opportunity scores by city
+- [x] **Chart 2**: Bar chart showing opportunity scores by city
   - Sorted by opportunity score (descending)
   - Color gradient: green (>70), yellow (40-70), red (<40)
   - Hover tooltips showing score breakdown
 
-- [ ] **Chart 3**: Scatter plot of population vs saturation
+- [x] **Chart 3**: Scatter plot of population vs saturation
   - X-axis: Population
   - Y-axis: Facilities per 10,000 people
   - Point size: total facilities
   - Hover tooltips with city name and metrics
 
-- [ ] **Chart 4**: Pie chart of rating distribution
+- [x] **Chart 4**: Pie chart of rating distribution
   - Segments: 5★, 4-5★, 3-4★, <3★, No rating
   - Percentage labels
   - Interactive legend
 
-- [ ] All charts integrate with sidebar filters
+- [x] All charts integrate with sidebar filters
   - Charts update when cities are selected/deselected
   - Charts update when min rating changes
 
-- [ ] Responsive layout
+- [x] Responsive layout
   - Charts resize based on screen width
   - Mobile-friendly (readable on tablets)
 
-- [ ] Interactive features
+- [x] Interactive features
   - Hover tooltips with detailed information
   - Click to highlight/filter (if feasible)
   - Legend interactions
 
 ### Technical Requirements
 
-- [ ] Use Plotly Express or Plotly Graph Objects
-- [ ] Charts render within Streamlit using `st.plotly_chart()`
-- [ ] Efficient rendering (< 2 seconds for all charts)
-- [ ] Handle edge cases:
+- [x] Use Plotly Express or Plotly Graph Objects
+- [x] Charts render within Streamlit using `st.plotly_chart()`
+- [x] Efficient rendering (< 2 seconds for all charts)
+- [x] Handle edge cases:
   - Empty dataframes (show "No data" message)
   - Single city selected
   - Missing values (NaN) in ratings
 
 ### UI/UX Requirements
 
-- [ ] Consistent color scheme across all charts
-- [ ] **Charts use accessible color palettes (colorblind-safe)**
-- [ ] Clear axis labels and titles
-- [ ] Readable font sizes
-- [ ] Professional appearance
-- [ ] Loading states for chart generation
+- [x] Consistent color scheme across all charts
+- [x] **Charts use accessible color palettes (colorblind-safe)**
+- [x] Clear axis labels and titles
+- [x] Readable font sizes
+- [x] Professional appearance
+- [x] Loading states for chart generation
 
 ### Optional Enhancements
 
@@ -456,10 +456,10 @@ streamlit>=1.27.0
 ## Success Criteria
 
 ### Minimum Viable Product (MVP)
-- [ ] 4 core charts render correctly
-- [ ] Charts integrate with filters
-- [ ] Hover tooltips work
-- [ ] Responsive layout
+- [x] 4 core charts render correctly
+- [x] Charts integrate with filters
+- [x] Hover tooltips work
+- [x] Responsive layout
 
 ### Stretch Goals
 - [ ] Export chart functionality

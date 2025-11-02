@@ -202,34 +202,18 @@ def main():
 
 def render_overview(facilities_df: pd.DataFrame, cities_df: pd.DataFrame):
     """
-    Render overview tab - TEMPORARY PLACEHOLDER.
+    Render overview tab with interactive charts.
 
     Args:
         facilities_df: Filtered facilities DataFrame
         cities_df: Filtered city stats DataFrame
 
     Note:
-        This is a placeholder. Full implementation will be added in Story 6.3
-        (Dashboard & Charts).
+        Implemented in Story 6.3 (Dashboard & Charts).
     """
-    st.info("📊 Overview dashboard will be implemented in Story 6.3")
+    from app.components.dashboard import render_overview as dashboard_render_overview
 
-    st.subheader("City Statistics Preview")
-    st.dataframe(
-        cities_df[["city", "total_facilities", "avg_rating", "opportunity_score"]].sort_values(
-            "opportunity_score", ascending=False
-        ),
-        use_container_width=True,
-        hide_index=True,
-    )
-
-    if len(facilities_df) > 0:
-        st.subheader("Sample Facilities")
-        st.dataframe(
-            facilities_df[["name", "city", "rating", "review_count"]].head(10),
-            use_container_width=True,
-            hide_index=True,
-        )
+    dashboard_render_overview(facilities_df, cities_df)
 
 
 def render_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame):
@@ -271,33 +255,17 @@ def render_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame):
 
 def render_analysis(cities_df: pd.DataFrame):
     """
-    Render analysis tab - TEMPORARY PLACEHOLDER.
+    Render analysis tab with opportunity metrics.
 
     Args:
         cities_df: Filtered city stats DataFrame
 
     Note:
-        This is a placeholder. Full implementation will be added in Story 6.3
-        (Dashboard & Charts).
+        Implemented in Story 6.3 (Dashboard & Charts).
     """
-    st.info("📈 Analysis charts will be implemented in Story 6.3")
-    st.write(f"Will show analytics for {len(cities_df)} cities")
+    from app.components.dashboard import render_analysis as dashboard_render_analysis
 
-    if len(cities_df) > 0:
-        st.write("**Preview of analytical metrics:**")
-        st.dataframe(
-            cities_df[
-                [
-                    "city",
-                    "opportunity_score",
-                    "population",
-                    "facilities_per_capita",
-                    "avg_distance_to_nearest",
-                ]
-            ],
-            use_container_width=True,
-            hide_index=True,
-        )
+    dashboard_render_analysis(cities_df)
 
 
 # ============================================================================
