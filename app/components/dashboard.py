@@ -87,7 +87,7 @@ def create_facilities_bar_chart(cities_df: pd.DataFrame) -> go.Figure:
     # Update layout
     fig.update_layout(
         showlegend=False,
-        xaxis_tickangle=-45,
+        xaxis_tickangle=-90,
         height=400,
     )
 
