@@ -235,9 +235,30 @@ def render_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame):
 
     st.subheader("🗺️ Interactive Map")
     
+    # Debug info
+    st.write(f"📍 Facilities to display: {len(facilities_df)}")
+    st.write(f"🏙️ Cities to display: {len(cities_df)}")
+    
+    # Check if we have data
+    if len(facilities_df) == 0 and len(cities_df) == 0:
+        st.warning("No data available to display on the map. Please adjust your filters.")
+        return
+    
     # Create and display the map
-    map_obj = create_map(facilities_df, cities_df)
-    st_folium(map_obj, width=1200, height=600)
+    try:
+        import streamlit.components.v1 as components
+        
+        map_obj = create_map(facilities_df, cities_df)
+        
+        # Render map HTML directly using Streamlit components
+        # This is more reliable than st_folium
+        map_html = map_obj._repr_html_()
+        components.html(map_html, height=650, scrolling=False)
+        
+    except Exception as e:
+        st.error(f"Error creating map: {str(e)}")
+        import traceback
+        st.code(traceback.format_exc())
     
     # Add legend/instructions
     st.markdown("""
