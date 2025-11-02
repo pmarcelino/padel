@@ -20,9 +20,11 @@ from src.utils.cache import cache_response
 # Setup module logger
 logger = logging.getLogger(__name__)
 
-# List of Algarve municipalities for city extraction
+# List of Algarve municipalities and major towns for city extraction
 ALGARVE_CITIES = {
+    # Municipalities (16 total)
     "Albufeira",
+    "Alcoutim",
     "Aljezur",
     "Castro Marim",
     "Faro",
@@ -37,6 +39,57 @@ ALGARVE_CITIES = {
     "Tavira",
     "Vila do Bispo",
     "Vila Real de Santo António",
+    # Albufeira
+    "Olhos de Água",
+    "Ferreiras",
+    "Guia",
+    # Alcoutim
+    "Martim Longo",
+    # Aljezur
+    "Odeceixe",
+    # Castro Marim
+    "Altura",
+    # Faro
+    "Montenegro",
+    "Estoi",
+    # Lagoa
+    "Carvoeiro",
+    "Ferragudo",
+    "Alcantarilha",
+    # Lagos
+    "Luz",
+    "Odiaxere",
+    "Burgau",
+    # Loulé
+    "Almancil",
+    "Quarteira",
+    "Vilamoura",
+    "Quinta do Lago",
+    "Vale do Lobo",
+    "Boliqueime",
+    "Salir",
+    "Tôr",
+    "Querença",
+    "Benafim",
+    # Monchique
+    "Marmelete",
+    # Olhão
+    "Fuseta",
+    # Portimão
+    "Alvor",
+    "Praia da Rocha",
+    # São Brás de Alportel
+    "Mesquita",
+    # Silves
+    "Armação de Pêra",
+    # Tavira
+    "Cabanas de Tavira",
+    "Santa Luzia",
+    # Vila do Bispo
+    "Sagres",
+    # Vila Real de Santo António
+    "Monte Gordo",
+    "Manta Rota",
 }
 
 
@@ -66,14 +119,10 @@ class GooglePlacesCollector:
         """
         self.api_key = api_key
         self.client = googlemaps.Client(key=api_key)
-        self.cache_enabled = (
-            cache_enabled if cache_enabled is not None else settings.cache_enabled
-        )
+        self.cache_enabled = cache_enabled if cache_enabled is not None else settings.cache_enabled
         self.rate_limit_delay = settings.rate_limit_delay
 
-    def search_padel_facilities(
-        self, region: str = "Algarve, Portugal"
-    ) -> List[Facility]:
+    def search_padel_facilities(self, region: str = "Algarve, Portugal") -> List[Facility]:
         """
         Search for padel facilities in a region.
 
@@ -120,14 +169,10 @@ class GooglePlacesCollector:
                         facility = self._get_place_details(place_id)
                         if facility:
                             all_facilities.append(facility)
-                            logger.debug(
-                                f"Added facility: {facility.name} ({facility.city})"
-                            )
+                            logger.debug(f"Added facility: {facility.name} ({facility.city})")
                     except Exception as e:
                         # Log error but continue with other facilities
-                        logger.warning(
-                            f"Error getting details for place_id {place_id}: {e}"
-                        )
+                        logger.warning(f"Error getting details for place_id {place_id}: {e}")
                         continue
 
             except Exception as e:
@@ -135,9 +180,7 @@ class GooglePlacesCollector:
                 logger.error(f"Error executing query '{query}': {e}")
                 continue
 
-        logger.info(
-            f"Collected {len(all_facilities)} unique facilities from {region}"
-        )
+        logger.info(f"Collected {len(all_facilities)} unique facilities from {region}")
         return all_facilities
 
     def _search_text(self, query: str) -> List[str]:
@@ -192,9 +235,7 @@ class GooglePlacesCollector:
         return place_ids
 
     @cache_response(ttl_days=30)
-    def _cached_text_search(
-        self, query: str, page_token: Optional[str] = None
-    ) -> dict:
+    def _cached_text_search(self, query: str, page_token: Optional[str] = None) -> dict:
         """
         Execute cached text search.
 
@@ -208,11 +249,9 @@ class GooglePlacesCollector:
             Raw API response dictionary
         """
         if page_token:
-            return self.client.places_nearby(
-                location=None, query=query, page_token=page_token
-            )
+            return self.client.places(query=query, page_token=page_token)
         else:
-            return self.client.places_nearby(location=None, query=query)
+            return self.client.places(query=query)
 
     def _get_place_details(self, place_id: str) -> Optional[Facility]:
         """
@@ -249,17 +288,13 @@ class GooglePlacesCollector:
 
             # Validate required fields
             if not all([place_id, name, address, latitude, longitude]):
-                logger.warning(
-                    f"Missing required fields for place_id {place_id}, skipping"
-                )
+                logger.warning(f"Missing required fields for place_id {place_id}, skipping")
                 return None
 
             # Extract city from address
             city = self._extract_city(address)
             if not city:
-                logger.warning(
-                    f"Could not extract city from address: {address}, skipping"
-                )
+                logger.warning(f"Could not extract city from address: {address}, skipping")
                 return None
 
             # Extract optional fields
@@ -270,8 +305,9 @@ class GooglePlacesCollector:
             website = place.get("website")
 
             # Determine facility type from Google types
-            types = place.get("types", [])
-            facility_type = self._determine_facility_type(types)
+            primary_type = place.get("type")
+            types = place.get("types")
+            facility_type = self._determine_facility_type(primary_type, types)
 
             # Create Facility object
             facility = Facility(
@@ -320,7 +356,7 @@ class GooglePlacesCollector:
                 "url",
                 "formatted_phone_number",
                 "website",
-                "types",
+                "type",
             ],
         )
 
@@ -347,20 +383,39 @@ class GooglePlacesCollector:
 
         return None
 
-    def _determine_facility_type(self, types: List[str]) -> str:
+    def _determine_facility_type(
+        self, primary_type: Optional[str], types: Optional[List[str]]
+    ) -> str:
         """
         Determine facility type from Google Place types.
 
         Maps Google types to internal facility type categories.
 
         Args:
-            types: List of Google Place type strings
+            primary_type: Single primary type string returned by Places API
+            types: Optional list of Google Place type strings (may be absent)
 
         Returns:
             Facility type: 'sports_center', 'club', or 'other'
         """
-        # Convert to lowercase for comparison
-        types_lower = [t.lower() for t in types]
+        type_tokens: List[str] = []
+
+        if types:
+            if isinstance(types, list):
+                type_tokens.extend(t.lower() for t in types if isinstance(t, str))
+            elif isinstance(types, str):
+                type_tokens.append(types.lower())
+
+        if primary_type and isinstance(primary_type, str):
+            type_tokens.append(primary_type.lower())
+
+        # Deduplicate while preserving order
+        seen: Set[str] = set()
+        types_lower = []
+        for token in type_tokens:
+            if token not in seen:
+                seen.add(token)
+                types_lower.append(token)
 
         # Check for sports center indicators
         if any(t in types_lower for t in ["gym", "health"]):
@@ -372,4 +427,3 @@ class GooglePlacesCollector:
 
         # Default to other
         return "other"
-

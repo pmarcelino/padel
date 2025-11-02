@@ -170,9 +170,17 @@ def validate_configuration(args: argparse.Namespace) -> bool:
         Prints error messages to stderr if validation fails
     """
     # Check Google API key
-    google_api_key = os.environ.get("GOOGLE_API_KEY", "")
-    if not google_api_key or len(google_api_key.strip()) == 0:
-        print("❌ Error: GOOGLE_API_KEY environment variable is not set", file=sys.stderr)
+    try:
+        google_api_key = settings.google_api_key
+        if not google_api_key or len(google_api_key.strip()) == 0:
+            print("❌ Error: GOOGLE_API_KEY environment variable is not set", file=sys.stderr)
+            print("\nPlease set your Google API key:", file=sys.stderr)
+            print("  export GOOGLE_API_KEY='your-api-key-here'", file=sys.stderr)
+            print("\nOr add it to your .env file:", file=sys.stderr)
+            print("  GOOGLE_API_KEY=your-api-key-here", file=sys.stderr)
+            return False
+    except Exception as e:
+        print(f"❌ Error: Failed to load GOOGLE_API_KEY: {e}", file=sys.stderr)
         print("\nPlease set your Google API key:", file=sys.stderr)
         print("  export GOOGLE_API_KEY='your-api-key-here'", file=sys.stderr)
         print("\nOr add it to your .env file:", file=sys.stderr)
@@ -182,7 +190,7 @@ def validate_configuration(args: argparse.Namespace) -> bool:
     # Check LLM API key if enrichment is requested
     if args.enrich_indoor_outdoor:
         if args.llm_provider == "openai":
-            openai_key = os.environ.get("OPENAI_API_KEY", "")
+            openai_key = settings.openai_api_key
             if not openai_key or len(openai_key.strip()) == 0:
                 print(
                     "❌ Error: OPENAI_API_KEY required for --enrich-indoor-outdoor",
@@ -192,7 +200,7 @@ def validate_configuration(args: argparse.Namespace) -> bool:
                 print("  export OPENAI_API_KEY='your-api-key-here'", file=sys.stderr)
                 return False
         elif args.llm_provider == "anthropic":
-            anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
+            anthropic_key = settings.anthropic_api_key
             if not anthropic_key or len(anthropic_key.strip()) == 0:
                 print(
                     "❌ Error: ANTHROPIC_API_KEY required for --enrich-indoor-outdoor",
@@ -525,8 +533,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     try:
         # Stage 2: Collect facilities
         print_stage(2, f"Searching for padel facilities in {args.region}")
-        google_api_key = os.environ.get("GOOGLE_API_KEY", "")
-        collector = GooglePlacesCollector(api_key=google_api_key)
+        collector = GooglePlacesCollector(api_key=settings.google_api_key)
 
         try:
             facilities = collect_facilities(collector, args.region)
@@ -542,7 +549,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         reviews_dict: Dict[str, List[str]] = {}
         if args.with_reviews:
             print_stage(3, "Fetching reviews")
-            review_collector = ReviewCollector(api_key=google_api_key)
+            review_collector = ReviewCollector(api_key=settings.google_api_key)
             reviews_dict = collect_reviews(review_collector, facilities)
 
         # Stage 4: LLM enrichment (optional)
