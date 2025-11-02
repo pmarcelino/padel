@@ -127,16 +127,16 @@ def _calculate_distance_for_city(self, city_stats: CityStats, all_facilities: Li
 
 ## Acceptance Criteria
 
-- [ ] Zero-facility cities no longer return `0.0` distance incorrectly
-- [ ] Zero-facility city distance is calculated from city center coordinates
-- [ ] Distance is measured to nearest facility **anywhere** (not just within city)
-- [ ] Cities with facilities use existing logic (no regression)
-- [ ] `_haversine_distance()` correctly calculates distance from city center to facility
-- [ ] Edge case: No facilities anywhere returns `0.0` (graceful degradation)
-- [ ] Edge case: One facility total - all zero-facility cities calculate distance to it
-- [ ] Unit tests verify zero-facility city distance calculation
-- [ ] Unit tests verify city center coordinates are used
-- [ ] Integration test with realistic data confirms correct distances
+- [x] Zero-facility cities no longer return `0.0` distance incorrectly
+- [x] Zero-facility city distance is calculated from city center coordinates
+- [x] Distance is measured to nearest facility **anywhere** (not just within city)
+- [x] Cities with facilities use existing logic (no regression)
+- [x] `_haversine_distance()` correctly calculates distance from city center to facility (using geodesic)
+- [x] Edge case: No facilities anywhere returns `0.0` (graceful degradation)
+- [x] Edge case: One facility total - all zero-facility cities calculate distance to it
+- [x] Unit tests verify zero-facility city distance calculation
+- [x] Unit tests verify city center coordinates are used
+- [x] Integration test with realistic data confirms correct distances
 
 ## Files to Modify
 

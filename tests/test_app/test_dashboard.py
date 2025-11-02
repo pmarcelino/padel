@@ -157,6 +157,30 @@ def facilities_all_no_rating():
     )
 
 
+@pytest.fixture
+def cities_with_zero_facilities():
+    """Create city stats DataFrame including cities with zero facilities."""
+    return pd.DataFrame(
+        {
+            "city": ["Albufeira", "Faro", "Loulé", "Olhão"],
+            "total_facilities": [2, 1, 0, 0],  # Last two have zero facilities
+            "avg_rating": [4.75, 4.2, np.nan, np.nan],
+            "median_rating": [4.75, 4.2, np.nan, np.nan],
+            "total_reviews": [220, 80, 0, 0],
+            "center_lat": [37.0888, 37.0194, 37.1376, 37.0267],
+            "center_lng": [-8.2478, -7.9322, -8.0222, -7.8411],
+            "population": [30000.0, 60000.0, 72162.0, 45396.0],
+            "facilities_per_capita": [0.0667, 0.0167, 0.0, 0.0],
+            "avg_distance_to_nearest": [2.5, 5.0, 7.71, 7.01],
+            "opportunity_score": [75.5, 85.2, 75.0, 67.0],
+            "population_weight": [6.0, 8.5, 10.0, 6.0],
+            "saturation_weight": [8.0, 9.2, 10.0, 10.0],
+            "quality_gap_weight": [6.5, 6.1, 5.0, 5.0],
+            "geographic_gap_weight": [7.5, 7.8, 5.0, 5.0],
+        }
+    )
+
+
 # ============================================================================
 # Test Facilities Bar Chart
 # ============================================================================
@@ -307,6 +331,21 @@ class TestPopulationScatter:
         # Verify marker colors are set
         assert fig.data[0].marker is not None
         assert fig.data[0].marker.color is not None
+
+    def test_population_scatter_includes_zero_facilities(self, cities_with_zero_facilities):
+        """Test scatter plot includes cities with zero facilities."""
+        from app.components.dashboard import create_population_saturation_scatter
+
+        fig = create_population_saturation_scatter(cities_with_zero_facilities)
+
+        assert isinstance(fig, go.Figure)
+        # Should plot all 4 cities including the 2 with zero facilities
+        assert len(fig.data[0].x) == 4
+        # Verify y-axis includes zeros
+        y_values = list(fig.data[0].y)
+        assert 0 in y_values
+        # Should have 2 cities with 0 facilities
+        assert y_values.count(0) == 2
 
 
 # ============================================================================

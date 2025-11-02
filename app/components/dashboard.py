@@ -177,13 +177,16 @@ def create_opportunity_chart(cities_df: pd.DataFrame) -> go.Figure:
         ]
     )
 
+    # Dynamic height based on number of cities (35px per city, min 400px)
+    chart_height = max(400, len(sorted_df) * 35)
+    
     # Update layout
     fig.update_layout(
         title="Opportunity Scores by City",
         xaxis_title="Opportunity Score (0-100)",
         yaxis_title="City",
         showlegend=False,
-        height=400,
+        height=chart_height,
     )
 
     return fig
@@ -192,9 +195,9 @@ def create_opportunity_chart(cities_df: pd.DataFrame) -> go.Figure:
 @st.cache_data
 def create_population_saturation_scatter(cities_df: pd.DataFrame) -> go.Figure:
     """
-    Create scatter plot: population vs facilities per capita.
+    Create scatter plot: population vs number of facilities.
 
-    Shows saturation levels across different city sizes.
+    Shows saturation levels across different city sizes, including cities with zero facilities.
 
     Args:
         cities_df: City statistics DataFrame with columns:
@@ -205,12 +208,14 @@ def create_population_saturation_scatter(cities_df: pd.DataFrame) -> go.Figure:
                    - opportunity_score: Score from 0-100
 
     Returns:
-        Plotly Figure object showing population vs saturation scatter plot
+        Plotly Figure object showing population vs facilities scatter plot
 
     Note:
         - Skips cities with missing population data
+        - Includes cities with 0 facilities (displayed at y=0)
         - Point size scaled by total_facilities
         - Point color scaled by opportunity_score
+        - Hover shows people per facility (or "N/A" for cities with 0 facilities)
     """
     # Handle empty DataFrame
     if len(cities_df) == 0:
@@ -231,8 +236,8 @@ def create_population_saturation_scatter(cities_df: pd.DataFrame) -> go.Figure:
         )
         return fig
 
-    # Filter out cities with missing population data
-    valid_df = cities_df.dropna(subset=["population", "facilities_per_capita"]).copy()
+    # Filter out cities with missing population data (keep cities with 0 facilities)
+    valid_df = cities_df.dropna(subset=["population"]).copy()
 
     # Handle case where all cities have missing data
     if len(valid_df) == 0:
@@ -248,35 +253,48 @@ def create_population_saturation_scatter(cities_df: pd.DataFrame) -> go.Figure:
         )
         return fig
 
-    # Convert facilities_per_capita to per 10,000 people for better readability
-    valid_df["facilities_per_10k"] = valid_df["facilities_per_capita"] * 10000
+    # Calculate people per facility for hover information (handle division by zero)
+    valid_df["people_per_facility"] = valid_df.apply(
+        lambda row: row["population"] / row["total_facilities"] if row["total_facilities"] > 0 else None,
+        axis=1
+    )
+    
+    # Format people_per_facility for display (show "N/A" for cities with 0 facilities)
+    valid_df["people_per_facility_display"] = valid_df["people_per_facility"].apply(
+        lambda x: f"{x:.0f}" if pd.notna(x) else "N/A"
+    )
+    
+    # Ensure cities with 0 facilities are visible (minimum size of 10)
+    valid_df["size_for_plot"] = valid_df["total_facilities"].apply(
+        lambda x: 10 if x == 0 else max(x, 10)
+    )
 
     # Create scatter plot
     fig = px.scatter(
         valid_df,
         x="population",
-        y="facilities_per_10k",
-        size="total_facilities",
+        y="total_facilities",
+        size="size_for_plot",
         color="opportunity_score",
         hover_name="city",
         labels={
             "population": "Population",
-            "facilities_per_10k": "Facilities per 10,000 people",
+            "total_facilities": "Number of Facilities",
             "opportunity_score": "Opportunity Score",
         },
         title="Population vs Saturation",
         color_continuous_scale="Viridis",
     )
-
+    
     # Customize hover template
     fig.update_traces(
         hovertemplate="<b>%{hovertext}</b><br>"
         + "Population: %{x:,}<br>"
         + "Facilities: %{customdata[0]}<br>"
-        + "Per 10k people: %{y:.2f}<br>"
+        + "People per facility: %{customdata[2]}<br>"
         + "Opportunity Score: %{customdata[1]:.1f}<br>"
         + "<extra></extra>",
-        customdata=valid_df[["total_facilities", "opportunity_score"]].values,
+        customdata=valid_df[["total_facilities", "opportunity_score", "people_per_facility_display"]].values,
     )
 
     # Update layout
@@ -475,6 +493,88 @@ def render_analysis(cities_df: pd.DataFrame) -> None:
     # Opportunity chart (full width)
     fig = create_opportunity_chart(cities_df)
     st.plotly_chart(fig, use_container_width=True)
+
+    # Opportunity Score Breakdown Table
+    st.subheader("📊 Opportunity Score Breakdown")
+    
+    if len(cities_df) > 0:
+        # Prepare table data
+        table_df = cities_df[[
+            "city",
+            "population_weight",
+            "saturation_weight",
+            "quality_gap_weight",
+            "geographic_gap_weight",
+            "opportunity_score"
+        ]].copy()
+        
+        # Rename columns for display
+        table_df.columns = [
+            "City",
+            "Population (0-10)",
+            "Low Saturation (0-10)",
+            "Quality Gap (0-10)",
+            "Geographic Gap (0-10)",
+            "Opportunity Score (0-100)"
+        ]
+        
+        # Sort by opportunity score descending
+        table_df = table_df.sort_values(
+            by="Opportunity Score (0-100)",
+            ascending=False
+        )
+        
+        # Format all numeric columns to 1 decimal place
+        numeric_cols = [
+            "Population (0-10)",
+            "Low Saturation (0-10)",
+            "Quality Gap (0-10)",
+            "Geographic Gap (0-10)",
+            "Opportunity Score (0-100)"
+        ]
+        for col in numeric_cols:
+            table_df[col] = table_df[col].apply(lambda x: f"{x:.1f}" if pd.notna(x) else "N/A")
+        
+        # Reset index for cleaner display
+        table_df = table_df.reset_index(drop=True)
+        
+        # Configure column tooltips
+        column_config = {
+            "City": st.column_config.TextColumn(
+                "City",
+                help="Municipality in the Algarve region"
+            ),
+            "Population (0-10)": st.column_config.TextColumn(
+                "Population (0-10)",
+                help="Population score (0-10). Higher population = more potential customers. Normalized using min-max across all cities."
+            ),
+            "Low Saturation (0-10)": st.column_config.TextColumn(
+                "Low Saturation (0-10)",
+                help="Low saturation score (0-10). Lower facilities per capita = less competition. Inverted normalization: fewer facilities scores higher."
+            ),
+            "Quality Gap (0-10)": st.column_config.TextColumn(
+                "Quality Gap (0-10)",
+                help="Quality gap score (0-10). Lower avg rating = opportunity for quality differentiation. Inverted normalization: lower ratings score higher."
+            ),
+            "Geographic Gap (0-10)": st.column_config.TextColumn(
+                "Geographic Gap (0-10)",
+                help="Geographic gap score (0-10). Based on avg distance to nearest facility: 0-5km=2.5, 5-10km=5.0, 10-20km=7.5, >20km=10.0"
+            ),
+            "Opportunity Score (0-100)": st.column_config.TextColumn(
+                "Opportunity Score (0-100)",
+                help="Final weighted score: Population×20% + Low Saturation×30% + Quality Gap×20% + Geographic Gap×30%"
+            ),
+        }
+        
+        # Display table with full width and column configuration
+        st.dataframe(
+            table_df,
+            use_container_width=True,
+            hide_index=True,
+            column_config=column_config,
+        )
+    else:
+        st.info("No data available for opportunity score breakdown")
 
     # Scatter plot (full width)
     st.subheader("Population vs Saturation")

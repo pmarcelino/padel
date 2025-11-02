@@ -8,18 +8,117 @@ and estimating travel willingness based on city population size.
 from typing import List
 from geopy.distance import geodesic
 from src.models.facility import Facility
+from src.models.city import CityStats
 
 
 class DistanceCalculator:
     """
     Calculate geographic distances between facilities.
     
-    This class provides static methods for:
-    - Calculating minimum distance from a city to nearest facilities in other cities
-    - Estimating travel willingness radius based on population size
+    This class provides both static methods (legacy API) and instance methods
+    for calculating distances. The instance methods support zero-facility cities
+    by using city center coordinates when no facilities exist in a city.
     
-    All methods are static and require no instance state.
+    Methods:
+    - calculate_distances(): New API that handles zero-facility cities
+    - calculate_distance_to_nearest(): Legacy static method (backwards compatible)
+    - calculate_travel_willingness_radius(): Static method for travel radius estimation
     """
+    
+    def calculate_distances(
+        self,
+        city_stats: List[CityStats],
+        all_facilities: List[Facility]
+    ) -> List[CityStats]:
+        """
+        Calculate avg_distance_to_nearest for each city.
+        
+        This method handles both normal cities (with facilities) and zero-facility
+        cities. For zero-facility cities, it calculates distance from the city center
+        coordinates to the nearest facility anywhere in the region.
+        
+        For cities WITH facilities:
+            - Calculate distance from each facility to its nearest neighbor in other cities
+            - Uses existing calculate_distance_to_nearest() logic
+        
+        For cities WITHOUT facilities:
+            - Calculate distance from city center to nearest facility anywhere
+            - Uses city_stats.center_lat and city_stats.center_lng as the reference point
+            - This represents: "How far do residents need to travel to play?"
+        
+        Args:
+            city_stats: List of CityStats objects to update with distance calculations
+            all_facilities: Complete list of facilities across all cities
+            
+        Returns:
+            Same list of CityStats with avg_distance_to_nearest populated for each city
+            
+        Example:
+            >>> calculator = DistanceCalculator()
+            >>> monchique_stats = CityStats(city="Monchique", total_facilities=0, 
+            ...                             center_lat=37.3167, center_lng=-8.5556, ...)
+            >>> faro_facility = Facility(city="Faro", latitude=37.0194, longitude=-7.9322, ...)
+            >>> result = calculator.calculate_distances([monchique_stats], [faro_facility])
+            >>> result[0].avg_distance_to_nearest
+            71.23
+        """
+        for stats in city_stats:
+            distance = self._calculate_distance_for_city(stats, all_facilities)
+            stats.avg_distance_to_nearest = distance
+        
+        return city_stats
+    
+    def _calculate_distance_for_city(
+        self,
+        city_stats: CityStats,
+        all_facilities: List[Facility]
+    ) -> float:
+        """
+        Calculate distance for a single city (handles zero-facility cities).
+        
+        This method detects whether a city has facilities and uses the appropriate
+        calculation strategy:
+        - If city has facilities: delegates to calculate_distance_to_nearest()
+        - If city has zero facilities: calculates from city center to nearest facility
+        
+        Args:
+            city_stats: CityStats object containing city information and coordinates
+            all_facilities: Complete list of facilities across all cities
+            
+        Returns:
+            Distance in kilometers, rounded to 2 decimal places. Returns 0.0 if:
+            - No facilities exist anywhere (can't calculate)
+            - City has facilities but no neighbors (edge case)
+            
+        Example:
+            >>> calculator = DistanceCalculator()
+            >>> monchique_stats = CityStats(city="Monchique", total_facilities=0,
+            ...                             center_lat=37.3167, center_lng=-8.5556, ...)
+            >>> facilities = [Facility(city="Lagos", latitude=37.1028, longitude=-8.6732, ...)]
+            >>> calculator._calculate_distance_for_city(monchique_stats, facilities)
+            27.45
+        """
+        # Check if city has facilities
+        city_facilities = [f for f in all_facilities if f.city == city_stats.city]
+        
+        if not city_facilities:
+            # Zero-facility city: calculate from city center to nearest facility
+            if not all_facilities:
+                return 0.0  # No facilities anywhere - can't calculate
+            
+            # Use city center coordinates from CityStats
+            city_center = (city_stats.center_lat, city_stats.center_lng)
+            
+            # Find nearest facility across ALL cities
+            distances = [
+                geodesic(city_center, (f.latitude, f.longitude)).kilometers
+                for f in all_facilities
+            ]
+            
+            return round(min(distances), 2)
+        else:
+            # City has facilities: use existing static method (DRY principle)
+            return self.calculate_distance_to_nearest(city_stats.city, all_facilities)
     
     @staticmethod
     def calculate_distance_to_nearest(
@@ -28,6 +127,10 @@ class DistanceCalculator:
     ) -> float:
         """
         Calculate minimum distance to nearest facility for a city.
+        
+        **Legacy API**: For new code, use calculate_distances() instance method which
+        properly handles zero-facility cities. This static method only works for cities
+        that have at least one facility.
         
         Uses the center point of the city (average of all facility coordinates)
         and finds the closest facility in other cities using geodesic distance.

@@ -371,14 +371,27 @@ def test_full_pipeline_integration(tmp_path, sample_csv_data):
     facilities = load_facilities_from_csv(csv_file)
     assert len(facilities) == 3
     
-    # Aggregate
+    # Aggregate (Story 9.1: Returns all 15 Algarve cities, including zero-facility cities)
     aggregator = CityAggregator()
     city_stats = aggregator.aggregate(facilities)
-    assert len(city_stats) == 2  # Two cities
+    assert len(city_stats) == 15  # All 15 Algarve cities
     
-    # Calculate distances
+    # Verify cities with facilities
+    cities_with_facilities = [s for s in city_stats if s.total_facilities > 0]
+    assert len(cities_with_facilities) == 2  # Albufeira and Faro have facilities
+    
+    # Verify zero-facility cities
+    zero_facility_cities = [s for s in city_stats if s.total_facilities == 0]
+    assert len(zero_facility_cities) == 13  # 13 cities without facilities
+    
+    # Calculate distances (Story 9.3: Handles zero-facility cities correctly)
     city_stats = calculate_geographic_metrics(city_stats, facilities)
     assert all(s.avg_distance_to_nearest is not None for s in city_stats)
+    
+    # Verify zero-facility cities have positive distances (not 0.0)
+    for city in zero_facility_cities:
+        assert city.avg_distance_to_nearest > 0, \
+            f"{city.city} is zero-facility but distance should not be 0.0"
     
     # Calculate scores
     scorer = OpportunityScorer()
@@ -387,7 +400,7 @@ def test_full_pipeline_integration(tmp_path, sample_csv_data):
     
     # Sort
     city_stats.sort(key=lambda s: s.opportunity_score, reverse=True)
-    assert city_stats[0].opportunity_score >= city_stats[1].opportunity_score
+    assert city_stats[0].opportunity_score >= city_stats[-1].opportunity_score
     
     # Save
     with patch("scripts.process_data.settings") as mock_settings:
@@ -403,7 +416,7 @@ def test_full_pipeline_integration(tmp_path, sample_csv_data):
     saved_city_stats = pd.read_csv(processed_dir / "city_stats.csv")
     
     assert len(saved_facilities) == 3
-    assert len(saved_city_stats) == 2
+    assert len(saved_city_stats) == 15  # All 15 Algarve cities
     assert "opportunity_score" in saved_city_stats.columns
     assert saved_city_stats["opportunity_score"].notna().all()
 

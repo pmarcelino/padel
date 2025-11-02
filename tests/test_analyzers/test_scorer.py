@@ -258,8 +258,8 @@ class TestEdgeCases:
     def test_single_city_returns_neutral_weights(self, single_city_stats):
         """Test that single city results in neutral weights for min-max metrics.
         
-        Note: Geographic gap uses absolute distance scaling (distance/20km),
-        so it will not be 0.5 for a single city - it depends on the actual distance.
+        Note: Geographic gap uses step-based buckets,
+        so it depends on which bucket the distance falls into.
         """
         scorer = OpportunityScorer()
         result = scorer.calculate_scores(single_city_stats)
@@ -269,16 +269,16 @@ class TestEdgeCases:
         assert stats.population_weight == 0.5
         assert stats.saturation_weight == 0.5
         assert stats.quality_gap_weight == 0.5
-        # Geographic gap uses absolute scaling: 5.0km / 20.0km = 0.25
-        assert stats.geographic_gap_weight == 0.25
-        # Expected score: (0.5*0.2 + 0.5*0.3 + 0.5*0.2 + 0.25*0.3) * 100 = 42.5
-        assert stats.opportunity_score == 42.5
+        # Geographic gap uses step-based buckets: 5.0km falls in 5-10km bucket = 0.50
+        assert stats.geographic_gap_weight == 0.50
+        # Expected score: (0.5*0.2 + 0.5*0.3 + 0.5*0.2 + 0.50*0.3) * 100 = 50.0
+        assert stats.opportunity_score == 50.0
 
     def test_zero_variance_returns_neutral_weights(self, city_stats_zero_variance):
         """Test that zero variance (all same values) results in neutral weights for min-max metrics.
         
-        Note: Geographic gap uses absolute distance scaling, not min-max normalization,
-        so it will be based on actual distance (10km / 20km = 0.5 in this case).
+        Note: Geographic gap uses step-based buckets, not min-max normalization,
+        so it will be based on which bucket the distance falls into.
         """
         scorer = OpportunityScorer()
         result = scorer.calculate_scores(city_stats_zero_variance)
@@ -288,10 +288,10 @@ class TestEdgeCases:
             assert stats.population_weight == 0.5
             assert stats.saturation_weight == 0.5
             assert stats.quality_gap_weight == 0.5
-            # Geographic gap uses absolute scaling: 10.0km / 20.0km = 0.5
-            assert stats.geographic_gap_weight == 0.5
-            # Expected score: (0.5*0.2 + 0.5*0.3 + 0.5*0.2 + 0.5*0.3) * 100 = 50.0
-            assert stats.opportunity_score == 50.0
+            # Geographic gap uses step-based buckets: 10.0km falls in 10-20km bucket = 0.75
+            assert stats.geographic_gap_weight == 0.75
+            # Expected score: (0.5*0.2 + 0.5*0.3 + 0.5*0.2 + 0.75*0.3) * 100 = 57.5
+            assert abs(stats.opportunity_score - 57.5) < 0.01
 
     def test_empty_list_returns_empty_list(self):
         """Test that empty list returns empty list."""
@@ -548,4 +548,110 @@ class TestOpportunityScoring:
         
         # Farther distance should have higher geographic_gap_weight
         assert result[1].geographic_gap_weight > result[0].geographic_gap_weight
+
+
+# Step-Based Geographic Gap Tests
+class TestStepBasedGeographicGap:
+    """Test step-based geographic gap normalization."""
+
+    def test_distance_zero_returns_025(self):
+        """Test distance of 0 km returns 0.25 (close bucket)."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(0.0)
+        assert weight == 0.25
+
+    def test_distance_2_5km_returns_025(self):
+        """Test distance within 0-5km bucket returns 0.25."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(2.5)
+        assert weight == 0.25
+
+    def test_distance_4_99km_returns_025(self):
+        """Test distance at edge of 0-5km bucket returns 0.25."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(4.99)
+        assert weight == 0.25
+
+    def test_distance_5km_returns_050(self):
+        """Test distance of exactly 5 km returns 0.50 (start of 5-10km bucket)."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(5.0)
+        assert weight == 0.50
+
+    def test_distance_7_5km_returns_050(self):
+        """Test distance within 5-10km bucket returns 0.50."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(7.5)
+        assert weight == 0.50
+
+    def test_distance_9_99km_returns_050(self):
+        """Test distance at edge of 5-10km bucket returns 0.50."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(9.99)
+        assert weight == 0.50
+
+    def test_distance_10km_returns_075(self):
+        """Test distance of exactly 10 km returns 0.75 (start of 10-20km bucket)."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(10.0)
+        assert weight == 0.75
+
+    def test_distance_15km_returns_075(self):
+        """Test distance within 10-20km bucket returns 0.75."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(15.0)
+        assert weight == 0.75
+
+    def test_distance_19_99km_returns_075(self):
+        """Test distance at edge of 10-20km bucket returns 0.75."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(19.99)
+        assert weight == 0.75
+
+    def test_distance_20km_returns_100(self):
+        """Test distance of exactly 20 km returns 1.0 (start of >20km bucket)."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(20.0)
+        assert weight == 1.0
+
+    def test_distance_50km_returns_100(self):
+        """Test distance far beyond 20km returns 1.0."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(50.0)
+        assert weight == 1.0
+
+    def test_distance_100km_returns_100(self):
+        """Test distance very far beyond 20km returns 1.0."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(100.0)
+        assert weight == 1.0
+
+    def test_none_distance_returns_default(self):
+        """Test None distance returns default value of 0.5."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(None)
+        assert weight == 0.5
+
+    def test_negative_distance_returns_default(self):
+        """Test negative distance returns default value of 0.5."""
+        scorer = OpportunityScorer()
+        weight = scorer._normalize_geographic_gap(-5.0)
+        assert weight == 0.5
+
+    def test_exact_bucket_boundaries(self):
+        """Test exact boundary values between buckets."""
+        scorer = OpportunityScorer()
+        
+        # Test transitions at boundaries
+        assert scorer._normalize_geographic_gap(4.99) == 0.25
+        assert scorer._normalize_geographic_gap(5.0) == 0.50
+        assert scorer._normalize_geographic_gap(5.01) == 0.50
+        
+        assert scorer._normalize_geographic_gap(9.99) == 0.50
+        assert scorer._normalize_geographic_gap(10.0) == 0.75
+        assert scorer._normalize_geographic_gap(10.01) == 0.75
+        
+        assert scorer._normalize_geographic_gap(19.99) == 0.75
+        assert scorer._normalize_geographic_gap(20.0) == 1.0
+        assert scorer._normalize_geographic_gap(20.01) == 1.0
 

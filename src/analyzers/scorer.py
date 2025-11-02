@@ -24,7 +24,7 @@ class OpportunityScorer:
     - Population: 20% (higher population = more potential customers)
     - Saturation: 30% (lower facilities per capita = less competition)
     - Quality Gap: 20% (lower ratings = room for quality differentiation)
-    - Geographic Gap: 30% (larger distance to competitors = geographic opportunity)
+    - Geographic Gap: 30% (step-based: 0-5km=0.25, 5-10km=0.50, 10-20km=0.75, >20km=1.0)
     """
     
     # Formula weights (must sum to 1.0)
@@ -32,6 +32,14 @@ class OpportunityScorer:
     SATURATION_WEIGHT_FACTOR = 0.3
     QUALITY_GAP_WEIGHT_FACTOR = 0.2
     GEOGRAPHIC_GAP_WEIGHT_FACTOR = 0.3
+    
+    # Geographic gap distance buckets (km) - (min_km, max_km, weight)
+    GEOGRAPHIC_GAP_BUCKETS = {
+        "close": (0, 5, 0.25),
+        "medium": (5, 10, 0.50),
+        "far": (10, 20, 0.75),
+        "very_far": (20, float('inf'), 1.0),
+    }
     
     def __init__(self):
         """
@@ -149,25 +157,31 @@ class OpportunityScorer:
     
     def _normalize_geographic_gap(self, value: Optional[float]) -> float:
         """
-        Normalize geographic gap (larger distance = higher opportunity).
+        Normalize geographic gap using step-based buckets.
         
-        Uses simple ratio normalization where larger distances to the nearest
-        facility receive higher weights. Distance is capped at 20km maximum.
-        Cities more than 20km from competitors receive the maximum geographic
-        gap weight.
+        Distance buckets:
+        - 0-5 km: 0.25 (close - low geographic opportunity)
+        - 5-10 km: 0.50 (medium distance - medium opportunity)
+        - 10-20 km: 0.75 (far - high opportunity)
+        - >20 km: 1.0 (very far - very high opportunity)
         
         Args:
             value: Average distance to nearest facility (km)
             
         Returns:
-            Normalized value between 0-1 (larger distance = higher score, capped at 20km)
+            Normalized value: 0.25, 0.50, 0.75, or 1.0
         """
-        if value is None:
-            return 0.5
+        if value is None or value < 0:
+            return 0.5  # Default for invalid values
         
-        # Cap at 20km and normalize to 0-1 range
-        capped_value = min(value, 20.0)
-        return capped_value / 20.0
+        if value < 5:
+            return 0.25
+        elif value < 10:
+            return 0.50
+        elif value < 20:
+            return 0.75
+        else:
+            return 1.0
     
     def _normalize(self, value: Optional[float], all_values: List[Optional[float]], invert: bool = False) -> float:
         """

@@ -304,3 +304,424 @@ class TestAcceptanceCriteria:
         tolerance = expected * 0.01  # 1%
         assert abs(distance - expected) <= tolerance, f"Distance {distance} not within 1% of {expected}"
 
+
+# ============================================================================
+# Zero-Facility City Distance Tests (Story 9.3)
+# ============================================================================
+
+class TestZeroFacilityCityDistances:
+    """Test distance calculations for cities with no facilities (Story 9.3)."""
+    
+    def test_zero_facility_city_distance_from_city_center(self):
+        """Zero-facility city calculates distance from city center coordinates."""
+        from src.models.city import CityStats
+        
+        # Create city stats for Monchique (zero facilities)
+        monchique_stats = CityStats(
+            city="Monchique",
+            total_facilities=0,
+            center_lat=37.3167,  # From CITY_CENTERS
+            center_lng=-8.5556,
+            population=5958,
+            facilities_per_capita=0.0
+        )
+        
+        # Create facility in Lagos
+        lagos_facility = Facility(
+            place_id="lag1",
+            name="Lagos Club",
+            address="Test Address",
+            city="Lagos",
+            latitude=37.1028,
+            longitude=-8.6732,
+            review_count=80
+        )
+        
+        # Calculate distances using new API
+        calculator = DistanceCalculator()
+        city_stats = [monchique_stats]
+        facilities = [lagos_facility]
+        
+        result = calculator.calculate_distances(city_stats, facilities)
+        
+        # Should calculate distance from Monchique center to Lagos facility
+        assert result[0].avg_distance_to_nearest > 0, "Distance should be positive"
+        assert result[0].avg_distance_to_nearest < 100, "Distance should be reasonable"
+    
+    def test_zero_facility_city_finds_nearest_across_all_cities(self):
+        """Zero-facility city finds nearest facility across all cities, not just own."""
+        from src.models.city import CityStats
+        
+        # Zero-facility city
+        monchique_stats = CityStats(
+            city="Monchique",
+            total_facilities=0,
+            center_lat=37.3167,
+            center_lng=-8.5556,
+            population=5958,
+            facilities_per_capita=0.0
+        )
+        
+        # Create facilities in multiple cities
+        albufeira_facility = Facility(
+            place_id="alb1",
+            name="Albufeira Club",
+            address="Test Address",
+            city="Albufeira",
+            latitude=37.0885,
+            longitude=-8.2475,
+            review_count=100
+        )
+        
+        faro_facility = Facility(
+            place_id="faro1",
+            name="Faro Club",
+            address="Test Address",
+            city="Faro",
+            latitude=37.0194,
+            longitude=-7.9322,
+            review_count=150
+        )
+        
+        calculator = DistanceCalculator()
+        city_stats = [monchique_stats]
+        facilities = [albufeira_facility, faro_facility]
+        
+        result = calculator.calculate_distances(city_stats, facilities)
+        
+        # Should find nearest across all cities
+        assert result[0].avg_distance_to_nearest > 0, "Should find nearest facility"
+        # Should be closer to Albufeira (~25km) than Faro (~70km)
+        assert result[0].avg_distance_to_nearest < 50, "Should find closer facility"
+    
+    def test_zero_facility_city_distance_is_positive(self):
+        """Zero-facility city has positive distance when facilities exist elsewhere."""
+        from src.models.city import CityStats
+        
+        vila_do_bispo_stats = CityStats(
+            city="Vila Do Bispo",
+            total_facilities=0,
+            center_lat=37.0833,
+            center_lng=-8.9122,
+            population=5717,
+            facilities_per_capita=0.0
+        )
+        
+        lagos_facility = Facility(
+            place_id="lag1",
+            name="Lagos Club",
+            address="Test Address",
+            city="Lagos",
+            latitude=37.1028,
+            longitude=-8.6732,
+            review_count=80
+        )
+        
+        calculator = DistanceCalculator()
+        result = calculator.calculate_distances([vila_do_bispo_stats], [lagos_facility])
+        
+        # Should NOT return 0.0 (the bug we're fixing)
+        assert result[0].avg_distance_to_nearest > 0, "Distance must be positive, not 0.0"
+        # Vila do Bispo is ~20-25km from Lagos
+        assert 15 <= result[0].avg_distance_to_nearest <= 30, "Distance should be realistic"
+    
+    def test_city_center_coordinates_used_correctly(self):
+        """Verify city center coordinates from CityStats are used for distance calculation."""
+        from src.models.city import CityStats
+        
+        # Create zero-facility city with known coordinates
+        test_city_stats = CityStats(
+            city="TestCity",
+            total_facilities=0,
+            center_lat=37.0,  # Specific test coordinates
+            center_lng=-8.0,
+            population=10000,
+            facilities_per_capita=0.0
+        )
+        
+        # Facility at known location
+        test_facility = Facility(
+            place_id="test1",
+            name="Test Facility",
+            address="Test",
+            city="OtherCity",
+            latitude=37.1,  # 0.1 degrees north
+            longitude=-8.0,  # Same longitude
+            review_count=50
+        )
+        
+        calculator = DistanceCalculator()
+        result = calculator.calculate_distances([test_city_stats], [test_facility])
+        
+        # Distance should be ~11.1 km (0.1 degrees latitude difference)
+        assert 10 <= result[0].avg_distance_to_nearest <= 12, \
+            f"Expected ~11km, got {result[0].avg_distance_to_nearest}km"
+    
+    def test_zero_facility_city_no_facilities_anywhere(self):
+        """Zero-facility city returns 0.0 when no facilities exist anywhere."""
+        from src.models.city import CityStats
+        
+        monchique_stats = CityStats(
+            city="Monchique",
+            total_facilities=0,
+            center_lat=37.3167,
+            center_lng=-8.5556,
+            population=5958,
+            facilities_per_capita=0.0
+        )
+        
+        calculator = DistanceCalculator()
+        result = calculator.calculate_distances([monchique_stats], [])
+        
+        # Edge case: no facilities anywhere, can't calculate distance
+        assert result[0].avg_distance_to_nearest == 0.0, "Should return 0.0 when no facilities exist"
+    
+    def test_zero_facility_city_one_facility_in_region(self):
+        """Zero-facility city calculates distance to single facility in region."""
+        from src.models.city import CityStats
+        
+        monchique_stats = CityStats(
+            city="Monchique",
+            total_facilities=0,
+            center_lat=37.3167,
+            center_lng=-8.5556,
+            population=5958,
+            facilities_per_capita=0.0
+        )
+        
+        single_facility = Facility(
+            place_id="only1",
+            name="Only Club",
+            address="Test",
+            city="Faro",
+            latitude=37.0194,
+            longitude=-7.9322,
+            review_count=100
+        )
+        
+        calculator = DistanceCalculator()
+        result = calculator.calculate_distances([monchique_stats], [single_facility])
+        
+        # Should calculate distance to the one facility
+        assert result[0].avg_distance_to_nearest > 0, "Should calculate to single facility"
+        assert result[0].avg_distance_to_nearest < 150, "Distance should be within Algarve region"
+    
+    def test_zero_facility_city_very_far(self):
+        """Zero-facility city handles very far distances (>50km)."""
+        from src.models.city import CityStats
+        
+        # City in far west
+        test_city = CityStats(
+            city="WestCity",
+            total_facilities=0,
+            center_lat=37.0,
+            center_lng=-9.0,  # Far west
+            population=10000,
+            facilities_per_capita=0.0
+        )
+        
+        # Facility in far east
+        east_facility = Facility(
+            place_id="east1",
+            name="East Club",
+            address="Test",
+            city="EastCity",
+            latitude=37.0,
+            longitude=-7.0,  # Far east (2 degrees = ~170km)
+            review_count=50
+        )
+        
+        calculator = DistanceCalculator()
+        result = calculator.calculate_distances([test_city], [east_facility])
+        
+        # Should handle large distance
+        assert result[0].avg_distance_to_nearest > 50, "Should handle distances >50km"
+        assert result[0].avg_distance_to_nearest < 300, "Should be realistic for Portugal"
+    
+    def test_zero_facility_city_very_close(self):
+        """Zero-facility city handles very close distances (<1km)."""
+        from src.models.city import CityStats
+        
+        # City with center very close to facility
+        test_city = CityStats(
+            city="CloseCity",
+            total_facilities=0,
+            center_lat=37.0000,
+            center_lng=-8.0000,
+            population=5000,
+            facilities_per_capita=0.0
+        )
+        
+        # Facility just across city border (~500m away)
+        nearby_facility = Facility(
+            place_id="near1",
+            name="Nearby Club",
+            address="Test",
+            city="NeighborCity",
+            latitude=37.0045,  # ~500m north
+            longitude=-8.0000,
+            review_count=30
+        )
+        
+        calculator = DistanceCalculator()
+        result = calculator.calculate_distances([test_city], [nearby_facility])
+        
+        # Should handle small distance accurately
+        assert 0 < result[0].avg_distance_to_nearest < 1, \
+            f"Expected <1km, got {result[0].avg_distance_to_nearest}km"
+
+
+# ============================================================================
+# Mixed City Scenario Tests (Story 9.3)
+# ============================================================================
+
+class TestMixedCityScenarios:
+    """Test scenarios with mix of cities with and without facilities."""
+    
+    def test_mixed_cities_with_and_without_facilities(self):
+        """Test with 2 cities having facilities, 1 without."""
+        from src.models.city import CityStats
+        
+        # Cities with facilities
+        albufeira_stats = CityStats(
+            city="Albufeira",
+            total_facilities=2,
+            center_lat=37.0885,
+            center_lng=-8.2475,
+            population=42388,
+            facilities_per_capita=0.47
+        )
+        
+        faro_stats = CityStats(
+            city="Faro",
+            total_facilities=1,
+            center_lat=37.0194,
+            center_lng=-7.9322,
+            population=64560,
+            facilities_per_capita=0.15
+        )
+        
+        # Zero-facility city
+        monchique_stats = CityStats(
+            city="Monchique",
+            total_facilities=0,
+            center_lat=37.3167,
+            center_lng=-8.5556,
+            population=5958,
+            facilities_per_capita=0.0
+        )
+        
+        # Facilities
+        albufeira_facility1 = Facility(
+            place_id="alb1", name="Club 1", address="Test",
+            city="Albufeira", latitude=37.088, longitude=-8.247, review_count=100
+        )
+        albufeira_facility2 = Facility(
+            place_id="alb2", name="Club 2", address="Test",
+            city="Albufeira", latitude=37.089, longitude=-8.248, review_count=80
+        )
+        faro_facility = Facility(
+            place_id="faro1", name="Faro Club", address="Test",
+            city="Faro", latitude=37.0194, longitude=-7.9322, review_count=150
+        )
+        
+        calculator = DistanceCalculator()
+        city_stats = [albufeira_stats, faro_stats, monchique_stats]
+        facilities = [albufeira_facility1, albufeira_facility2, faro_facility]
+        
+        result = calculator.calculate_distances(city_stats, facilities)
+        
+        # Cities with facilities should have positive distances (to other cities)
+        albufeira_result = [r for r in result if r.city == "Albufeira"][0]
+        faro_result = [r for r in result if r.city == "Faro"][0]
+        monchique_result = [r for r in result if r.city == "Monchique"][0]
+        
+        assert albufeira_result.avg_distance_to_nearest > 0, "Albufeira should have distance to Faro"
+        assert faro_result.avg_distance_to_nearest > 0, "Faro should have distance to Albufeira"
+        assert monchique_result.avg_distance_to_nearest > 0, "Monchique should have distance to nearest"
+        
+        # Monchique should NOT be 0.0 (the bug)
+        assert monchique_result.avg_distance_to_nearest != 0.0, "Zero-facility city should not be 0.0"
+    
+    def test_all_fifteen_cities_realistic_distribution(self):
+        """Test with all 15 Algarve cities with realistic facility distribution."""
+        from src.models.city import CityStats
+        from src.analyzers.aggregator import CityAggregator
+        
+        # Create facilities in only 5 cities (10 cities with zero facilities)
+        facilities = [
+            Facility(place_id="alb1", name="Albufeira 1", address="Test",
+                    city="Albufeira", latitude=37.0885, longitude=-8.2475, review_count=100),
+            Facility(place_id="faro1", name="Faro 1", address="Test",
+                    city="Faro", latitude=37.0194, longitude=-7.9322, review_count=150),
+            Facility(place_id="lag1", name="Lagos 1", address="Test",
+                    city="Lagos", latitude=37.1028, longitude=-8.6732, review_count=80),
+            Facility(place_id="lou1", name="Loulé 1", address="Test",
+                    city="Loulé", latitude=37.1376, longitude=-8.0222, review_count=120),
+            Facility(place_id="port1", name="Portimão 1", address="Test",
+                    city="Portimão", latitude=37.1391, longitude=-8.5372, review_count=200),
+        ]
+        
+        # Aggregate to get all 15 cities
+        aggregator = CityAggregator()
+        all_city_stats = aggregator.aggregate(facilities)
+        
+        # Calculate distances
+        calculator = DistanceCalculator()
+        result = calculator.calculate_distances(all_city_stats, facilities)
+        
+        # All 15 cities should have distance values
+        assert len(result) == 15, "Should process all 15 cities"
+        
+        # Cities with facilities should have distances to other cities
+        cities_with_facilities = [r for r in result if r.total_facilities > 0]
+        for city in cities_with_facilities:
+            assert city.avg_distance_to_nearest > 0, \
+                f"{city.city} has facilities but distance is {city.avg_distance_to_nearest}"
+        
+        # Cities without facilities should have distances from city center
+        cities_without_facilities = [r for r in result if r.total_facilities == 0]
+        assert len(cities_without_facilities) == 10, "Should have 10 zero-facility cities"
+        
+        for city in cities_without_facilities:
+            # Should NOT be 0.0 (the bug we're fixing)
+            assert city.avg_distance_to_nearest > 0, \
+                f"{city.city} is zero-facility but distance should not be 0.0"
+            # Should be reasonable distance within Algarve
+            assert city.avg_distance_to_nearest < 150, \
+                f"{city.city} distance {city.avg_distance_to_nearest}km seems too large"
+    
+    def test_city_with_facilities_unchanged(self):
+        """Regression: cities with facilities should use existing behavior."""
+        from src.models.city import CityStats
+        
+        # City with facilities
+        albufeira_stats = CityStats(
+            city="Albufeira",
+            total_facilities=2,
+            center_lat=37.0885,
+            center_lng=-8.2475,
+            population=42388,
+            facilities_per_capita=0.47
+        )
+        
+        facilities = [
+            Facility(place_id="alb1", name="Albufeira 1", address="Test",
+                    city="Albufeira", latitude=37.0885, longitude=-8.2475, review_count=100),
+            Facility(place_id="alb2", name="Albufeira 2", address="Test",
+                    city="Albufeira", latitude=37.089, longitude=-8.248, review_count=80),
+            Facility(place_id="faro1", name="Faro 1", address="Test",
+                    city="Faro", latitude=37.0194, longitude=-7.9322, review_count=150),
+        ]
+        
+        # Calculate with new API
+        calculator = DistanceCalculator()
+        result = calculator.calculate_distances([albufeira_stats], facilities)
+        
+        # Calculate with old API (should be same)
+        old_distance = DistanceCalculator.calculate_distance_to_nearest("Albufeira", facilities)
+        
+        # Results should match (regression test)
+        assert result[0].avg_distance_to_nearest == old_distance, \
+            "New API should produce same results as old API for cities with facilities"
+

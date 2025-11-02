@@ -98,9 +98,9 @@ def calculate_geographic_metrics(
     """
     Calculate avg_distance_to_nearest for each city.
     
-    This function updates each CityStats object with the minimum distance
-    to the nearest facility in neighboring cities using the DistanceCalculator.
-    The input list is modified in place.
+    This function updates each CityStats object with distance calculations using
+    the DistanceCalculator. Properly handles both cities with facilities and
+    zero-facility cities (which calculate distance from city center to nearest facility).
     
     Args:
         city_stats: List of CityStats objects to update
@@ -116,15 +116,9 @@ def calculate_geographic_metrics(
         >>> updated_stats[0].avg_distance_to_nearest
         26.01
     """
-    for stats in city_stats:
-        # Calculate distance to nearest facility in other cities
-        distance = DistanceCalculator.calculate_distance_to_nearest(
-            stats.city, 
-            facilities
-        )
-        stats.avg_distance_to_nearest = distance
-    
-    return city_stats
+    # Use new API that handles zero-facility cities correctly
+    calculator = DistanceCalculator()
+    return calculator.calculate_distances(city_stats, facilities)
 
 
 def save_processed_data(
