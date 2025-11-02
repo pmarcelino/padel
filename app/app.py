@@ -260,7 +260,6 @@ def render_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame):
         import traceback
         st.code(traceback.format_exc())
     
-    # Add legend/instructions
     st.markdown("""
     **Map Legend:**
     - 🟢 **Green markers**: High-rated facilities (≥4.5⭐)
@@ -270,7 +269,7 @@ def render_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame):
     - ⚫ **Gray markers**: No rating available
     - 🟣 **Purple markers**: City centers with opportunity scores
     
-    **Tip:** Click on markers for details. Use the layer control (top-right) to toggle the heatmap.
+    **Tip:** Click on markers for details. Use the layer control (top-right of the map) to toggle marker groups or the heatmap.
     """)
 
 

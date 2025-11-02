@@ -143,10 +143,10 @@ def create_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame) -> folium.M
         folium.Map: Configured map object ready for rendering in Streamlit
 
     Features:
-        - Facility markers color-coded by rating
-        - City center markers with opportunity scores
+        - Facility markers color-coded by rating (with separate toggle layers)
+        - City center markers with opportunity scores (toggleable)
         - Heatmap layer showing facility density
-        - Layer control for toggling heatmap
+        - Layer control for toggling all marker groups
         - Handles null/missing values gracefully
 
     Map Configuration:
@@ -162,7 +162,18 @@ def create_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame) -> folium.M
         tiles="OpenStreetMap",
     )
     
-    # Add facility markers
+    # Create feature groups for different marker types
+    facility_groups = {
+        "green": folium.FeatureGroup(name="🟢 Green Facilities (≥4.5⭐)", show=True),
+        "blue": folium.FeatureGroup(name="🔵 Blue Facilities (≥4.0⭐)", show=True),
+        "orange": folium.FeatureGroup(name="🟠 Orange Facilities (≥3.5⭐)", show=True),
+        "red": folium.FeatureGroup(name="🔴 Red Facilities (<3.5⭐)", show=True),
+        "gray": folium.FeatureGroup(name="⚫ Gray Facilities (No Rating)", show=True),
+    }
+    
+    city_group = folium.FeatureGroup(name="🟣 City Centers", show=True)
+    
+    # Add facility markers to their respective groups
     for _, facility in facilities_df.iterrows():
         # Determine marker color based on rating
         color = _get_marker_color(facility["rating"])
@@ -170,7 +181,7 @@ def create_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame) -> folium.M
         # Create popup HTML
         popup_html = _create_facility_popup(facility)
         
-        # Add CircleMarker for facility
+        # Add CircleMarker to the appropriate group
         folium.CircleMarker(
             location=[facility["latitude"], facility["longitude"]],
             radius=8,
@@ -180,9 +191,9 @@ def create_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame) -> folium.M
             fill=True,
             fillColor=color,
             fillOpacity=0.7,
-        ).add_to(m)
+        ).add_to(facility_groups[color])
     
-    # Add city center markers
+    # Add city center markers to city group
     for _, city in cities_df.iterrows():
         # Create popup HTML
         popup_html = _create_city_popup(city)
@@ -190,13 +201,19 @@ def create_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame) -> folium.M
         # Create tooltip with city name and score
         tooltip_text = f"{city['city']}: {city['opportunity_score']:.0f} score"
         
-        # Add marker for city center
+        # Add marker to city group
         folium.Marker(
             location=[city["center_lat"], city["center_lng"]],
             popup=folium.Popup(popup_html, max_width=250),
             tooltip=tooltip_text,
             icon=folium.Icon(color="purple", icon="info-sign"),
-        ).add_to(m)
+        ).add_to(city_group)
+    
+    # Add all feature groups to the map
+    for group in facility_groups.values():
+        group.add_to(m)
+    if len(cities_df) > 0:
+        city_group.add_to(m)
     
     # Add heatmap layer for facility density (only if facilities exist)
     if len(facilities_df) > 0:
@@ -209,13 +226,13 @@ def create_map(facilities_df: pd.DataFrame, cities_df: pd.DataFrame) -> folium.M
             heat_data,
             radius=15,
             blur=25,
-            name="Density Heatmap",
+            name="🔥 Density Heatmap",
             show=True,
         )
         heat_map.add_to(m)
     
-    # Add layer control
-    folium.LayerControl().add_to(m)
+    # Add layer control to toggle groups
+    folium.LayerControl(collapsed=False).add_to(m)
     
     return m
 
